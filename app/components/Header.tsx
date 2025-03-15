@@ -4,17 +4,17 @@ import {signIn, signOut} from "@/auth";
 import MenuComponent from "@/app/components/MenuComponent";
 import Link from "next/link";
 
-const PageHead = async (props: {session: { user?: { name?: string; image?: string } } | null }) => {
+const Header = async (props: {session: { user?: { name?: string; image?: string } } | null }) => {
     return (
-        <header className="bg-black px-4">
-            <nav className="flex items-center justify-between ml-14 mr-14">
+        <header>
+            <nav className="flex justify-between">
                 <Link href="/">
                     <Image src="/logo.png" alt="logo" width={144} height={30} />
                 </Link>
-                <div className="flex items-center justify-between text-white">
+                <div className="flex items-center text-white">
                     {props.session && props.session.user ? (
                         <>
-                            <div className="flex items-center justify-between px-2">
+                            <div className="flex items-center px-2">
                                 <MenuComponent image={<Image src="/menu.png" alt="menu drop down" width={30} height={30}></Image>}
                                                label="Others"
                                                option="My list"/>
@@ -38,7 +38,7 @@ const PageHead = async (props: {session: { user?: { name?: string; image?: strin
                             "use server";
                             await signIn('github');
                         }}>
-                            <button className="text-white bg-[#7A7A7A] px-8 py-0.5 rounded-2xl cursor-pointer" type="submit">
+                            <button className="text-white m-1 bg-green-400 px-8 py-0.5 rounded-2xl cursor-pointer" type="submit">
                                 Login
                             </button>
                         </form>
@@ -49,4 +49,4 @@ const PageHead = async (props: {session: { user?: { name?: string; image?: strin
     )
 }
 
-export default PageHead;
+export default Header;

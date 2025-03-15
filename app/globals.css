@@ -46,6 +46,14 @@
 }
 
 @layer utilities {
+  .search-form{
+    @apply flex gap-2 bg-black rounded-md px-2 py-1;
+  }
+
+  .search-button{
+    @apply flex items-center gap-2 px-2;
+  }
+
 }
 
 :root {

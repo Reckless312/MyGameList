@@ -1,8 +1,7 @@
-import PageHead from "@/app/components/PageHead";
+import Header from "@/app/components/Header";
 import '@/app/globals.css'
 import { inter } from '@/app/ui/fonts';
 import Footer from "@/app/components/Footer";
-import PagesNavigation from "@/app/components/PagesNavigation";
 import React from "react";
 import {auth} from "@/auth";
 
@@ -13,8 +12,7 @@ export default async function Layout({ children }: Readonly<{ children: React.Re
         <html lang="en">
             <body>
                 <main className={`${inter.className} antialiased min-h-screen bg-black`}>
-                    <PageHead session={session ? { user: { name: session.user?.name ?? undefined, image: session.user?.image ?? undefined } } : null}/>
-                    <PagesNavigation />
+                    <Header session={session ? { user: { name: session.user?.name ?? undefined, image: session.user?.image ?? undefined } } : null}/>
                     {children}
                     <Footer />
                 </main>
