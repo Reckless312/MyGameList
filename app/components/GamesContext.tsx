@@ -12,6 +12,9 @@ type Game = {
 type GamesContextType = {
     games: Game[];
     addGame: (newGame: Game) => void;
+    removeGame: (removableGame: Game) => void;
+    checkGame: (game: Game) => number;
+    updateGame: (gameTitle: string | null, updatedGame: Game) => void;
 }
 
 const GamesContext = createContext<GamesContextType | undefined>(undefined);
@@ -28,8 +31,20 @@ export function GamesProvider({children}: {children: ReactNode}) {
         setGames([...games, newGame]);
     }
 
+    const removeGame = (game: Game) => {
+        setGames([...games.filter((inListGame) => inListGame.name !== game.name)]);
+    }
+
+    const checkGame = (game: Game) => {
+        return games.filter((inListGame) => inListGame.name === game.name).length;
+    }
+
+    const updateGame = (gameTitle: string | null, updatedGame: Game) => {
+        setGames(games.map((inListGame) => inListGame.name === gameTitle ? updatedGame : inListGame));
+    }
+
     return (
-        <GamesContext.Provider value={{games, addGame}}>
+        <GamesContext.Provider value={{games, addGame, removeGame, checkGame, updateGame}}>
             {children}
         </GamesContext.Provider>
     );

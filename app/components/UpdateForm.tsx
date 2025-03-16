@@ -1,11 +1,12 @@
 'use client'
 
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import Form from "next/form";
 import InputComponent from "@/app/components/InputComponent";
 import {useGames} from "@/app/components/GamesContext";
-import {useRouter} from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 import {z, ZodFormattedError} from "zod"
+
 
 const schema = z.object({
     name: z.string().min(3, "Name must be a string with at least 3 characters"),
@@ -14,14 +15,18 @@ const schema = z.object({
     releaseDate: z.string().min(4, "Release date must be a string with at least 4 characters"),
 })
 
-const AddForm = ({query} : {query ? : string}) => {
-    const {addGame, checkGame} = useGames() ?? {};
+const UpdateForm = ({query} : {query ? : string}) => {
+    const searchParams = useSearchParams();
+
+    const {updateGame} = useGames() ?? {};
     const [game, setGame] = useState({
-        name: "Baldur's Gate 3",
-        description: "Baldur’s Gate 3 is a story-rich, party-based RPG set in the universe of Dungeons & Dragons, where your choices shape a tale of fellowship and betrayal, survival and sacrifice, and the lure of absolute power. ",
-        image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg?t=1740386911",
-        releaseDate: "3 Aug, 2023",
+        name: searchParams.get("name") ?? "",
+        description: searchParams.get("description") ?? "",
+        image: searchParams.get("image") ?? "",
+        releaseDate: searchParams.get("releaseDate") ?? "",
     });
+
+    const gameTitle = useRef(game.name)
 
     const[errors, setErrors] = useState<ZodFormattedError<{name: string, description: string, image: string, releaseDate: string}>>();
     const router = useRouter();
@@ -40,20 +45,7 @@ const AddForm = ({query} : {query ? : string}) => {
             return;
         }
 
-        if (checkGame?.(game)) {
-            setErrors({
-                _errors: errors?._errors ?? [],
-                name: {
-                    _errors: ["A game with this name already exists."]
-                },
-                description: errors?.description ?? { _errors: [] },
-                image: errors?.image ?? { _errors: [] },
-                releaseDate: errors?.releaseDate ?? { _errors: [] },
-            });
-            return;
-        }
-
-        addGame?.(game);
+        updateGame?.(gameTitle.current, game);
         router.push("/");
     }
 
@@ -78,7 +70,7 @@ const AddForm = ({query} : {query ? : string}) => {
                 </div>
                 <div className="add-button flex items-center justify-center bg-green-400 rounded-md">
                     <button className="w-full h-full cursor-pointer" type="submit">
-                        Add
+                        Update
                     </button>
                 </div>
             </div>
@@ -86,4 +78,4 @@ const AddForm = ({query} : {query ? : string}) => {
     )
 }
 
-export default AddForm;
+export default UpdateForm;

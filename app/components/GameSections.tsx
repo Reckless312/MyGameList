@@ -17,8 +17,8 @@ const GameSections = ({query}: {query: string}) => {
                 <ul className="mt-7 card_grid">
                     {games.length > 0 ? (
                         games.filter(game => game.name.toLowerCase().includes(query.toLowerCase()))
-                        .map((game, index: number) => (
-                            <GameCard key={index} game={game}/>
+                        .map((game) => (
+                            <GameCard key={game.name} game={game}/>
                         ))
                     ) : (
                         <p>No games found</p>

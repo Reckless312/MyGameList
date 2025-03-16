@@ -9,8 +9,6 @@ const PagesNavigation = ( {query}: {query?: string}) => {
                     <Link href="/add">
                         <span>Add</span>
                     </Link>
-                    <span>Delete</span>
-                    <span>Update</span>
                 </nav>
                 <SearchForm query={query}/>
             </div>
