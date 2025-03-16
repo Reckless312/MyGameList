@@ -16,7 +16,8 @@ const GameSections = ({query}: {query: string}) => {
 
                 <ul className="mt-7 card_grid">
                     {games.length > 0 ? (
-                        games.map((game, index: number) => (
+                        games.filter(game => game.name.toLowerCase().includes(query.toLowerCase()))
+                        .map((game, index: number) => (
                             <GameCard key={index} game={game}/>
                         ))
                     ) : (

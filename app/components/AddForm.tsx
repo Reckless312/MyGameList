@@ -47,7 +47,7 @@ const AddForm = ({query} : {query ? : string}) => {
                     <InputComponent name={"releaseDate"} value={game.releaseDate} onChange={handleChange} placeholder={"Release Date"} query={query}/>
                 </div>
                 <div className="add-button flex items-center justify-center bg-green-400 rounded-md">
-                    <button type="submit">
+                    <button className="w-full h-full cursor-pointer" type="submit">
                         Add
                     </button>
                 </div>
