@@ -1,6 +1,6 @@
 import React from 'react';
 
-const InputComponent = (props: {name: string, placeholder: string, query: string | undefined, value: any, onChange: any}) => {
+const InputComponent = (props: {name: string, placeholder: string, query: string | undefined, value: string | number, onChange: React.ChangeEventHandler<HTMLInputElement>}) => {
     return (
         <>
             <input
