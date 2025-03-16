@@ -5,7 +5,7 @@ import Form from "next/form";
 import InputComponent from "@/app/components/InputComponent";
 import {useGames} from "@/app/components/GamesContext";
 import {useRouter} from "next/navigation";
-import {z} from "zod"
+import {z, ZodFormattedError} from "zod"
 
 const schema = z.object({
     name: z.string().min(3, "Name must be a string with at least 3 characters"),
@@ -23,7 +23,7 @@ const AddForm = ({query} : {query ? : string}) => {
         releaseDate: "3 Aug, 2023",
     });
 
-    const[errors, setErrors] = useState<any>(null);
+    const[errors, setErrors] = useState<ZodFormattedError<{name: string, description: string, image: string, releaseDate: string}>>();
     const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
