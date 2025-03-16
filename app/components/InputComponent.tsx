@@ -9,7 +9,7 @@ const InputComponent = (props: {name: string, placeholder: string, query: string
                 placeholder={props.placeholder}
                 value={props.value}
                 onChange={props.onChange}
-                className="bg-gray-300 text-black rounded-md"
+                className="bg-gray-300 text-black rounded-md w-full"
             />
         </>
     )

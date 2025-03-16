@@ -1,13 +1,14 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const nextConfig = {
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "**",
+            },
+        ],
+    },
 };
 
 export default nextConfig;
-
-module.exports = {
-    images: {
-        domains: ['avatars.githubusercontent.com', 'shared.cloudflare.steamstatic.com'],
-    },
-};
