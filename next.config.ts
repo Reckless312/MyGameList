@@ -8,6 +8,6 @@ export default nextConfig;
 
 module.exports = {
     images: {
-        domains: ['avatars.githubusercontent.com'],
+        domains: ['avatars.githubusercontent.com', 'shared.cloudflare.steamstatic.com'],
     },
 };

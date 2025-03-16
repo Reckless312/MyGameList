@@ -1,7 +1,7 @@
 const Footer = () => {
     return (
-        <footer className="fixed bottom-0 left-0 w-full overflow-hidden">
-            <div>
+        <footer className="">
+            <div className="bg-black">
                 <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"
                      preserveAspectRatio="none">
                     <path
