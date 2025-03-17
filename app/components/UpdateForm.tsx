@@ -18,7 +18,7 @@ const schema = z.object({
 const UpdateForm = ({query} : {query ? : string}) => {
     const searchParams = useSearchParams();
 
-    const {updateGame} = useGames() ?? {};
+    const {updateGame, checkGame} = useGames() ?? {};
     const [game, setGame] = useState({
         name: searchParams.get("name") ?? "",
         description: searchParams.get("description") ?? "",
@@ -42,6 +42,19 @@ const UpdateForm = ({query} : {query ? : string}) => {
 
         if(!result.success){
             setErrors(result.error.format());
+            return;
+        }
+
+        if (checkGame?.(game)) {
+            setErrors({
+                _errors: errors?._errors ?? [],
+                name: {
+                    _errors: ["A game with this name already exists."]
+                },
+                description: errors?.description ?? { _errors: [] },
+                image: errors?.image ?? { _errors: [] },
+                releaseDate: errors?.releaseDate ?? { _errors: [] },
+            });
             return;
         }
 

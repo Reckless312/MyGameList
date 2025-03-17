@@ -1,5 +1,7 @@
 import SearchForm from "@/app/components/SearchForm";
 import Link from "next/link";
+import React from "react";
+import SortButton from "@/app/components/SortButton";
 
 const PagesNavigation = ( {query}: {query?: string}) => {
     return (
@@ -10,7 +12,10 @@ const PagesNavigation = ( {query}: {query?: string}) => {
                         <span>Add</span>
                     </Link>
                 </nav>
-                <SearchForm query={query}/>
+                <div className="flex gap-x-4">
+                    <SortButton/>
+                    <SearchForm query={query}/>
+                </div>
             </div>
         </div>
     )

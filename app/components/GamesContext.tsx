@@ -15,7 +15,10 @@ type GamesContextType = {
     removeGame: (removableGame: Game) => void;
     checkGame: (game: Game) => number;
     updateGame: (gameTitle: string | null, updatedGame: Game) => void;
+    sortGames: () => void;
 }
+
+let sortAscending = true;
 
 const GamesContext = createContext<GamesContextType | undefined>(undefined);
 
@@ -43,8 +46,19 @@ export function GamesProvider({children}: {children: ReactNode}) {
         setGames(games.map((inListGame) => inListGame.name === gameTitle ? updatedGame : inListGame));
     }
 
+    const sortGames = () => {
+        if(sortAscending){
+            setGames(games.sort((a, b) => a.name.localeCompare(b.name)));
+            sortAscending = false;
+        }
+        else{
+            setGames(games.sort((a, b) => b.name.localeCompare(a.name)));
+            sortAscending = true;
+        }
+    }
+
     return (
-        <GamesContext.Provider value={{games, addGame, removeGame, checkGame, updateGame}}>
+        <GamesContext.Provider value={{games, addGame, removeGame, checkGame, updateGame, sortGames}}>
             {children}
         </GamesContext.Provider>
     );
