@@ -12,7 +12,7 @@ const schema = z.object({
     name: z.string().min(3, "Name must be a string with at least 3 characters"),
     description: z.string().min(10, "Description must be a string with at least 10 characters"),
     image: z.string().url("Invalid image url"),
-    releaseDate: z.string().min(4, "Release date must be a string with at least 4 characters"),
+    releaseDate: z.string().date("Release date must follow YYYY-MM-DD format"),
 })
 
 const UpdateForm = ({query} : {query ? : string}) => {
