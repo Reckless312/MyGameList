@@ -5,7 +5,11 @@ import GameCard from "@/app/components/GameCard";
 import {useGames} from "@/app/components/GamesContext";
 
 const GameSections = ({query}: {query: string}) => {
-    const {games = []} = useGames() || {};
+    const {games = [], getOldestGame, getEarliestGame, getAverageGameByDate} = useGames() || {};
+
+    const oldestGame = getOldestGame?.();
+    const earliestGame = getEarliestGame?.();
+    const averageGameByDate = getAverageGameByDate?.();
 
     return (
         <>
@@ -17,9 +21,27 @@ const GameSections = ({query}: {query: string}) => {
                 <ul className="mt-7 card_grid">
                     {games.length > 0 ? (
                         games.filter(game => game.name.toLowerCase().includes(query.toLowerCase()))
-                        .map((game) => (
-                            <GameCard key={game.name} game={game}/>
-                        ))
+                        .map((game) =>
+                            {
+                                let backgroundColor;
+                                if (games.length < 3) {
+                                    backgroundColor = 'bg-black';
+                                }
+                                else if (game.name === oldestGame?.name) {
+                                    backgroundColor = 'bg-red-500';
+                                }
+                                else if (game.name === earliestGame?.name) {
+                                    backgroundColor = 'bg-green-500';
+                                }
+                                else if (game.name === averageGameByDate?.name) {
+                                    backgroundColor = 'bg-orange-500';
+                                }
+                                else{
+                                    backgroundColor = 'bg-black';
+                                }
+                                return (<GameCard key={game.name} game={game} background={backgroundColor}/>);
+                            }
+                        )
                     ) : (
                         <p>No games found</p>
                     )}

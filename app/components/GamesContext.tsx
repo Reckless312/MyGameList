@@ -16,6 +16,9 @@ type GamesContextType = {
     checkGame: (game: Game) => number;
     updateGame: (gameTitle: string | null, updatedGame: Game) => void;
     sortGames: () => void;
+    getOldestGame: () => Game | undefined;
+    getEarliestGame: () => Game | undefined;
+    getAverageGameByDate: () => Game | undefined;
 }
 
 let sortAscending = true;
@@ -47,18 +50,45 @@ export function GamesProvider({children}: {children: ReactNode}) {
     }
 
     const sortGames = () => {
+        const sortedGames = [...games];
+
         if(sortAscending){
-            setGames(games.sort((a, b) => a.name.localeCompare(b.name)));
-            sortAscending = false;
+            sortedGames.sort((a, b) => a.name.localeCompare(b.name))
         }
         else{
-            setGames(games.sort((a, b) => b.name.localeCompare(a.name)));
-            sortAscending = true;
+            sortedGames.sort((a, b) => b.name.localeCompare(a.name));
         }
+
+        sortAscending = !sortAscending;
+        setGames(sortedGames);
+    }
+
+    const getOldestGame = () => {
+        const localGames = [...games];
+        if(localGames.length == 0) {
+            return undefined;
+        }
+        return localGames.reduce((maxGame, currentGame) => new Date(maxGame.releaseDate).getTime() < new Date(currentGame.releaseDate).getTime() ? currentGame : maxGame, games[0])
+    }
+
+    const getEarliestGame = () => {
+        const localGames = [...games];
+        if(localGames.length == 0) {
+            return undefined;
+        }
+        return localGames.reduce((minGame, currentGame) => new Date(minGame.releaseDate).getTime() > new Date(currentGame.releaseDate).getTime() ? currentGame : minGame, games[0])
+    }
+
+    const getAverageGameByDate = () => {
+        const localGames = [...games];
+        if(localGames.length == 0) {
+            return undefined;
+        }
+        return localGames.sort((a, b) => new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime()).at(Math.floor(games.length / 2));
     }
 
     return (
-        <GamesContext.Provider value={{games, addGame, removeGame, checkGame, updateGame, sortGames}}>
+        <GamesContext.Provider value={{games, addGame, removeGame, checkGame, updateGame, sortGames, getOldestGame, getEarliestGame, getAverageGameByDate}}>
             {children}
         </GamesContext.Provider>
     );

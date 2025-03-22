@@ -4,13 +4,13 @@ import {useGames} from "@/app/components/GamesContext";
 import {useRouter} from "next/navigation";
 import { Button } from "@/components/ui/button"
 
-const GameCard = ({game}: {game: { image: string; name: string; description: string; releaseDate: string }}) => {
+const GameCard = ({game, background}: {game: { image: string; name: string; description: string; releaseDate: string }, background: string}) => {
     const {removeGame} = useGames() ?? {};
     const router = useRouter();
 
     return (
         <li>
-            <div className="flex">
+            <div className={`flex ${background}`}>
                 <Image src={game.image} alt={"Image not available"} width={500} height={400}></Image>
                 <div className="ml-5 flex flex-col justify-between">
                     <h3>{game.name}</h3>
@@ -21,7 +21,7 @@ const GameCard = ({game}: {game: { image: string; name: string; description: str
                     <Button className="bg-red-600 w-40 on hover:bg-red-950" variant="default" onClick={() => {
                         removeGame?.(game);
                     }}>Delete</Button>
-                    <Button className="bg-blue-950 w-40 " variant="default" onClick={() => {
+                    <Button className="bg-blue-950 w-40" variant="default" onClick={() => {
                         router.push(`/update?name=${encodeURIComponent(game.name)}&description=${encodeURIComponent(game.description)}&releaseDate=${encodeURIComponent(game.releaseDate)}&image=${encodeURIComponent(game.image)}`);
                     }}>Update</Button>
                 </div>
