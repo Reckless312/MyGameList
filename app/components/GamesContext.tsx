@@ -655,7 +655,7 @@ export function GamesProvider({children}: {children: ReactNode}) {
         if(localGames.length == 0) {
             return undefined;
         }
-        return localGames.sort((a, b) => a.name.localeCompare(b.name)).at(Math.floor(localGames.length / 2));
+        return localGames.sort((a, b) => a.releaseDate.localeCompare(b.releaseDate)).at(Math.floor(localGames.length / 2));
     }
 
     return (
