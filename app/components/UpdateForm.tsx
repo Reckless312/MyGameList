@@ -45,7 +45,7 @@ const UpdateForm = ({query} : {query ? : string}) => {
             return;
         }
 
-        if (checkGame?.(game)) {
+        if (checkGame?.(game) && gameTitle.current != game.name) {
             setErrors({
                 _errors: errors?._errors ?? [],
                 name: {

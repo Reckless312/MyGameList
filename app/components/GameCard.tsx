@@ -10,12 +10,14 @@ const GameCard = ({game, background}: {game: { image: string; name: string; desc
 
     return (
         <li>
-            <div className={`flex ${background}`}>
-                <Image src={game.image} alt={"Image not available"} width={500} height={400}></Image>
-                <div className="ml-5 flex flex-col justify-between">
-                    <h3>{game.name}</h3>
-                    <p>{game.description}</p>
-                    <p>{game.releaseDate}</p>
+            <div className={`flex ${background} justify-between`}>
+                <div className="flex">
+                    <Image src={game.image} alt={"Image not available"} width={400} height={400}></Image>
+                    <div className="ml-5 flex flex-col justify-between">
+                        <h3>{game.name}</h3>
+                        <p>{game.description}</p>
+                        <p>{game.releaseDate}</p>
+                    </div>
                 </div>
                 <div className="ml-5 mr-5 flex flex-col gap-y-4 items-center justify-center">
                     <Button className="bg-red-600 w-40 on hover:bg-red-950" variant="default" onClick={() => {
