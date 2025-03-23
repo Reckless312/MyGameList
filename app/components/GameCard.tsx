@@ -4,7 +4,7 @@ import {useGames} from "@/app/components/GamesContext";
 import {useRouter} from "next/navigation";
 import { Button } from "@/components/ui/button"
 
-const GameCard = ({game, background}: {game: { image: string; name: string; description: string; releaseDate: string }, background: string}) => {
+const GameCard = ({game, background}: {game: { image: string; name: string; description: string; releaseDate: string ; price: number; tag: string;}, background: string}) => {
     const {removeGame} = useGames() ?? {};
     const router = useRouter();
 
@@ -15,8 +15,10 @@ const GameCard = ({game, background}: {game: { image: string; name: string; desc
                     <Image src={game.image} alt={"Image not available"} width={400} height={400}></Image>
                     <div className="ml-5 flex flex-col justify-between">
                         <h3>{game.name}</h3>
-                        <p>{game.description}</p>
-                        <p>{game.releaseDate}</p>
+                        <p>Main tag: {game.tag}</p>
+                        <p>Description: {game.description}</p>
+                        <p>Release date: {game.releaseDate}</p>
+                        <p>Price: {game.price} €</p>
                     </div>
                 </div>
                 <div className="ml-5 mr-5 flex flex-col gap-y-4 items-center justify-center">
@@ -24,7 +26,7 @@ const GameCard = ({game, background}: {game: { image: string; name: string; desc
                         removeGame?.(game);
                     }}>Delete</Button>
                     <Button className="bg-blue-950 w-40" variant="default" onClick={() => {
-                        router.push(`/update?name=${encodeURIComponent(game.name)}&description=${encodeURIComponent(game.description)}&releaseDate=${encodeURIComponent(game.releaseDate)}&image=${encodeURIComponent(game.image)}`);
+                        router.push(`/update?name=${encodeURIComponent(game.name)}&description=${encodeURIComponent(game.description)}&releaseDate=${encodeURIComponent(game.releaseDate)}&image=${encodeURIComponent(game.image)}&price=${encodeURIComponent(game.price)}&tag=${encodeURIComponent(game.tag)}`);
                     }}>Update</Button>
                 </div>
             </div>

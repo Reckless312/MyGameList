@@ -3,6 +3,7 @@
 import React from 'react';
 import GameCard from "@/app/components/GameCard";
 import {useGames} from "@/app/components/GamesContext";
+import {GameChart} from "@/app/components/GameChart";
 
 const GameSections = ({query}: {query: string}) => {
     const {games = [], getOldestGame, getEarliestGame, getAverageGameByDate} = useGames() || {};
@@ -13,6 +14,7 @@ const GameSections = ({query}: {query: string}) => {
 
     return (
         <>
+            <GameChart></GameChart>
             <section className="section_container text-white">
                 <p className="text-white items-center flex justify-center text-2xl font-bold m-5">
                     {query ? `Search results for "${query}"` : "All games"}

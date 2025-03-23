@@ -13,6 +13,8 @@ const schema = z.object({
     description: z.string().min(10, "Description must be a string with at least 10 characters"),
     image: z.string().url("Invalid image url"),
     releaseDate: z.string().date("Release date must follow YYYY-MM-DD format"),
+    price: z.number().nonnegative().max(99.99, "Price must be at most 99.99 ..."),
+    tag: z.string().min(3, "Tag must be a string with at least 3 characters"),
 })
 
 const UpdateForm = ({query} : {query ? : string}) => {
@@ -24,11 +26,13 @@ const UpdateForm = ({query} : {query ? : string}) => {
         description: searchParams.get("description") ?? "",
         image: searchParams.get("image") ?? "",
         releaseDate: searchParams.get("releaseDate") ?? "",
+        price: Number(searchParams.get("price")) ?? 0,
+        tag: searchParams.get("tag") ?? "",
     });
 
     const gameTitle = useRef(game.name)
 
-    const[errors, setErrors] = useState<ZodFormattedError<{name: string, description: string, image: string, releaseDate: string}>>();
+    const[errors, setErrors] = useState<ZodFormattedError<{name: string, description: string, image: string, releaseDate: string, price: number, tag: string}>>();
     const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,6 +41,10 @@ const UpdateForm = ({query} : {query ? : string}) => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        if(!isNaN(Number(game.price))){
+            game.price = Number(game.price);
+        }
 
         const result = schema.safeParse(game);
 
@@ -54,6 +62,8 @@ const UpdateForm = ({query} : {query ? : string}) => {
                 description: errors?.description ?? { _errors: [] },
                 image: errors?.image ?? { _errors: [] },
                 releaseDate: errors?.releaseDate ?? { _errors: [] },
+                price: errors?.price ?? { _errors: [] },
+                tag: errors?.tag ?? { _errors: [] },
             });
             return;
         }
@@ -80,6 +90,14 @@ const UpdateForm = ({query} : {query ? : string}) => {
                 <div className="flex items-center gap-x-4 flex-col">
                     <InputComponent name={"releaseDate"} value={game.releaseDate} onChange={handleChange} placeholder={"Release Date"} query={query} />
                     {errors?.releaseDate && <span className="text-red-500">{errors.releaseDate._errors[0]}</span>}
+                </div>
+                <div className="flex items-center gap-x-4 flex-col">
+                    <InputComponent name={"price"} value={game.price} onChange={handleChange} placeholder={"Price"} query={query} />
+                    {errors?.price && <span className="text-red-500">{errors.price._errors[0]}</span>}
+                </div>
+                <div className="flex items-center gap-x-4 flex-col">
+                    <InputComponent name={"tag"} value={game.tag} onChange={handleChange} placeholder={"Main Tag"} query={query} />
+                    {errors?.tag && <span className="text-red-500">{errors.tag._errors[0]}</span>}
                 </div>
                 <div className="add-button flex items-center justify-center bg-green-400 rounded-md">
                     <button className="w-full h-full cursor-pointer" type="submit">
