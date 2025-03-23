@@ -4,6 +4,8 @@ import React from 'react';
 import GameCard from "@/app/components/GameCard";
 import {useGames} from "@/app/components/GamesContext";
 import {GameChart} from "@/app/components/GameChart";
+import {PaginationComponent} from "@/app/components/PaginationComponent";
+import {useSearchParams} from "next/navigation";
 
 const GameSections = ({query}: {query: string}) => {
     const {games = [], getOldestGame, getEarliestGame, getAverageGameByDate} = useGames() || {};
@@ -12,18 +14,24 @@ const GameSections = ({query}: {query: string}) => {
     const earliestGame = getEarliestGame?.();
     const averageGameByDate = getAverageGameByDate?.();
 
+    const searchParams = useSearchParams();
+
+    const currentPage = Number(searchParams.get("page")) || 1;
+    const itemsOnPage = 10;
+
+    const startIndex = (currentPage - 1) * itemsOnPage;
+    const foundGames = games.filter(game => game.name.toLowerCase().includes(query.toLowerCase()))
+    const gamesOnPage = foundGames.slice(startIndex, startIndex + itemsOnPage);
+
     return (
         <>
-            <GameChart></GameChart>
+            <GameChart/>
             <section className="section_container text-white">
                 <p className="text-white items-center flex justify-center text-2xl font-bold m-5">
                     {query ? `Search results for "${query}"` : "All games"}
                 </p>
-
                 <ul className="mt-7 card_grid">
-                    {games.length > 0 ? (
-                        games.filter(game => game.name.toLowerCase().includes(query.toLowerCase()))
-                        .map((game) =>
+                    {gamesOnPage.length > 0 ? (gamesOnPage.map((game) =>
                             {
                                 let backgroundColor;
                                 if (games.length < 3) {
@@ -49,6 +57,7 @@ const GameSections = ({query}: {query: string}) => {
                     )}
                 </ul>
             </section>
+            <PaginationComponent query={query} page={currentPage} itemsOnPage={itemsOnPage} numberOfGames={foundGames.length}/>
         </>
     )
 }
