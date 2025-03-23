@@ -16,9 +16,9 @@ const chartConfig: ChartConfig = {
 export function GameChart() {
     const {games = []} = useGames() || {};
 
-    let gamesReleaseDates = [0, 0, 0, 0];
-    let gamesPrices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    let gameTagsMap = new Map();
+    const gamesReleaseDates = [0, 0, 0, 0];
+    const gamesPrices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    const gameTagsMap = new Map();
 
     games.forEach(game => {
         gamesReleaseDates[Math.floor((new Date(game.releaseDate).getFullYear() - 1990) / 10)]++;
@@ -69,49 +69,38 @@ export function GameChart() {
 
 
     return (
-        <div className="flex justify-between">
-            <ChartContainer config={chartConfig} className="min-h-[200px] w-1/4 border">
-                <BarChart accessibilityLayer data={timeChartData}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                        dataKey="time"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Bar dataKey="numberOfGames" fill={chartConfig.numberOfGames.color} radius={4} />
-                </BarChart>
-            </ChartContainer>
-            <ChartContainer config={chartConfig} className="min-h-[200px] w-1/4 border">
-                <BarChart accessibilityLayer data={priceChartData}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                        dataKey="price"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Bar dataKey="numberOfGames" fill={chartConfig.numberOfGames.color} radius={4} />
-                </BarChart>
-            </ChartContainer>
-            <ChartContainer config={chartConfig} className="min-h-[200px] w-2/4 border">
-                <BarChart accessibilityLayer data={tagChartData}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                        dataKey="tag"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Bar dataKey="numberOfGames" fill={chartConfig.numberOfGames.color} radius={4} />
-                </BarChart>
-            </ChartContainer>
-        </div>
-    )
+        games.length > 0 ? (
+            <div className="flex justify-between">
+                <ChartContainer config={chartConfig} className="min-h-[200px] w-1/4 border">
+                    <BarChart accessibilityLayer data={timeChartData}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="time" tickLine={false} tickMargin={10} axisLine={false} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <ChartLegend content={<ChartLegendContent />} />
+                        <Bar dataKey="numberOfGames" fill={chartConfig.numberOfGames.color} radius={4} />
+                    </BarChart>
+                </ChartContainer>
+
+                <ChartContainer config={chartConfig} className="min-h-[200px] w-1/4 border">
+                    <BarChart accessibilityLayer data={priceChartData}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="price" tickLine={false} tickMargin={10} axisLine={false} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <ChartLegend content={<ChartLegendContent />} />
+                        <Bar dataKey="numberOfGames" fill={chartConfig.numberOfGames.color} radius={4} />
+                    </BarChart>
+                </ChartContainer>
+
+                <ChartContainer config={chartConfig} className="min-h-[200px] w-2/4 border">
+                    <BarChart accessibilityLayer data={tagChartData}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="tag" tickLine={false} tickMargin={10} axisLine={false} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <ChartLegend content={<ChartLegendContent />} />
+                        <Bar dataKey="numberOfGames" fill={chartConfig.numberOfGames.color} radius={4} />
+                    </BarChart>
+                </ChartContainer>
+            </div>
+        ) : null
+    );
 }
