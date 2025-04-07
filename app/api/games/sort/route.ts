@@ -18,7 +18,7 @@ export async function GET(){
 
         return NextResponse.json(res.rows);
     }
-    catch(error)
+    catch
     {
         return NextResponse.json({message: "Error happened while retrieving games"}, {status: 500});
     }

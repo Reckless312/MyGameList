@@ -32,7 +32,7 @@ export async function GET(request: Request){
             }
         });
     }
-    catch(error)
+    catch
     {
         return NextResponse.json({message: "Error happened while retrieving games"}, {status: 500});
     }
@@ -66,7 +66,7 @@ export async function DELETE(request: Request){
 
         return NextResponse.json({message: "Game deleted successfully"});
     }
-    catch(error)
+    catch
     {
         return NextResponse.json({message: "Error happened while deleting game"}, {status: 500});
     }
@@ -100,7 +100,7 @@ export async function POST(request: Request){
 
         return NextResponse.json({message: "Game created successfully"});
     }
-    catch (error)
+    catch
     {
         return NextResponse.json({message: "Error happened while creating game"} , {status: 500});
     }
@@ -134,7 +134,7 @@ export async function PATCH(request: Request){
 
         return NextResponse.json({message: "Game updated successfully"});
     }
-    catch (error)
+    catch
     {
         return NextResponse.json({message: "Error happened while updating the game"} , {status: 500});
     }

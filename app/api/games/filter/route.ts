@@ -24,7 +24,7 @@ export async function POST(request: Request){
 
         return NextResponse.json({rows: res.rows});
     }
-    catch (error)
+    catch
     {
         return NextResponse.json({message: "Error happened while filtering games"}, {status: 500});
     }
