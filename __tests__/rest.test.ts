@@ -4,7 +4,8 @@
 
 import '@testing-library/jest-dom';
 import { TextEncoder } from 'node:util';
-import {GET, POST, DELETE, setPool, PATCH} from '@/app/api/games/route';
+import {GET, POST, DELETE, PATCH} from '@/app/api/games/route';
+import {setPool} from "@/lib/data"
 import { Pool } from 'pg';
 import {afterEach, beforeEach, describe, expect, it, jest} from '@jest/globals'
 

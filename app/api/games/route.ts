@@ -1,24 +1,10 @@
 import {NextResponse} from "next/server";
-import {Pool} from "pg";
-
-export const createOriginalPool = () => {
-    return new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl:{rejectUnauthorized: false},
-    })
-}
-
-
-let pool = createOriginalPool();
-
-export const setPool = (newPool: Pool) => {
-    pool = newPool;
-}
+import {getPool} from "@/lib/data"
 
 export async function GET(request: Request){
     const origin = request.headers.get("origin");
 
-    const client = await pool.connect();
+    const client = await getPool().connect();
     const selectQuery = "SELECT * FROM GAMES";
 
     try
@@ -50,7 +36,7 @@ export async function DELETE(request: Request){
         return NextResponse.json({message: "Game id required"}, {status: 404});
     }
 
-    const client = await pool.connect();
+    const client = await getPool().connect();
     try
     {
         const selectCheckQuery = `SELECT * FROM GAMES WHERE id = $1`;
@@ -84,7 +70,7 @@ export async function POST(request: Request){
         return NextResponse.json({message: "Missing required fields"}, {status: 404});
     }
 
-    const client = await pool.connect();
+    const client = await getPool().connect();
     try
     {
         const selectCheckQuery = `SELECT id FROM GAMES WHERE name = $1 AND image = $2 AND releaseDate = $3 `;
@@ -118,7 +104,7 @@ export async function PATCH(request: Request){
         return NextResponse.json({message: "Missing required fields"}, {status: 404});
     }
 
-    const client = await pool.connect();
+    const client = await getPool().connect();
     try
     {
         const selectCheckQuery = `SELECT * FROM GAMES WHERE id = $1`;

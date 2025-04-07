@@ -1,15 +1,8 @@
 import {NextResponse} from "next/server";
-import {Pool} from "pg";
-import {createOriginalPool} from "@/app/api/games/route";
-
-let pool = createOriginalPool();
-
-export const setPool = (newPool: Pool) => {
-    pool = newPool;
-}
+import {getPool} from "@/lib/data"
 
 export async function GET(){
-    const client = await pool.connect();
+    const client = await getPool().connect();
     const selectQuery = "SELECT * FROM GAMES ORDER BY name";
 
     try

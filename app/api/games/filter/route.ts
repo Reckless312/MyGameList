@@ -1,12 +1,5 @@
 import {NextResponse} from "next/server";
-import {Pool} from "pg";
-import {createOriginalPool} from "@/app/api/games/route";
-
-let pool = createOriginalPool();
-
-export const setPool = (newPool: Pool) => {
-    pool = newPool;
-}
+import {getPool} from "@/lib/data"
 
 export async function POST(request: Request){
     const {name} : Partial<Game> = await request.json();
@@ -16,7 +9,7 @@ export async function POST(request: Request){
         return NextResponse.json({message: "Missing required fields"}, {status: 404});
     }
 
-    const client = await pool.connect();
+    const client = await getPool().connect();
     try
     {
         const selectCheckQuery = `SELECT * FROM GAMES WHERE LOWER(name) LIKE '%' || LOWER($1) ||'%'`;
