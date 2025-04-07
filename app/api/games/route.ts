@@ -1,5 +1,6 @@
 import {NextResponse} from "next/server";
 import {getPool} from "@/lib/data"
+import {gameSchema} from "@/lib/zodSchema"
 
 export async function GET(request: Request){
     const origin = request.headers.get("origin");
@@ -63,7 +64,14 @@ export async function DELETE(request: Request){
 }
 
 export async function POST(request: Request){
-    const {name, description, image, releaseDate, price, tag} : Partial<Game> = await request.json();
+    const jsonBody = await request.json();
+    const validation = gameSchema.safeParse(jsonBody);
+
+    if (!validation.success){
+        return NextResponse.json({message: "Validation for input failed!"}, {status: 400});
+    }
+
+    const {name, description, image, releaseDate, price, tag} : Partial<Game> = jsonBody;
 
     if (!name || !description || !image || !releaseDate || !price || !tag)
     {
@@ -97,7 +105,14 @@ export async function POST(request: Request){
 }
 
 export async function PATCH(request: Request){
-    const {id, name, description, image, releaseDate, price, tag} : Game = await request.json();
+    const jsonBody = await request.json();
+    const validation = gameSchema.safeParse(jsonBody);
+
+    if (!validation.success){
+        return NextResponse.json({message: "Validation for input failed!"}, {status: 400});
+    }
+
+    const {id, name, description, image, releaseDate, price, tag} : Game = jsonBody;
 
     if (!id || !name || !description || !image || !releaseDate || !price || !tag)
     {
