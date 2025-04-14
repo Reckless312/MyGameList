@@ -14,7 +14,7 @@ export default function NetworkStatus() {
                     mode: 'no-cors'
                 });
                 ChangeNetworkStatus?.(true);
-            } catch (error) {
+            } catch {
                 ChangeNetworkStatus?.(false);
             }
         };
@@ -23,7 +23,7 @@ export default function NetworkStatus() {
             try {
                 await fetch('http://localhost:8080/api/games')
                 ChangeServerStatus?.(true);
-            } catch (e) {
+            } catch{
                 ChangeServerStatus?.(false);
             }
         }
