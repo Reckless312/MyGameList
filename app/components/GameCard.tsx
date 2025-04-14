@@ -4,7 +4,7 @@ import {useGames} from "@/app/components/GamesContext";
 import {useRouter} from "next/navigation";
 import { Button } from "@/components/ui/button"
 
-const GameCard = ({game, background}: {game: { image: string; name: string; description: string; releaseDate: string ; price: number; tag: string;}, background: string}) => {
+const GameCard = ({game, background}: {game: { id: number; image: string; name: string; description: string; releaseDate: string ; price: number; tag: string;}, background: string}) => {
     const {removeGame} = useGames() ?? {};
     const router = useRouter();
 
@@ -22,11 +22,15 @@ const GameCard = ({game, background}: {game: { image: string; name: string; desc
                     </div>
                 </div>
                 <div className="ml-5 mr-5 flex flex-col gap-y-4 items-center justify-center">
-                    <Button className="bg-red-600 w-40 on hover:bg-red-950" variant="default" onClick={() => {
+                    <Button className="bg-red-600 w-40 on hover:bg-red-950" variant="default" onClick={async () => {
+                        await fetch(`/api/games/`, {
+                            method: 'DELETE',
+                            body: JSON.stringify({id: game.id}),
+                        });
                         removeGame?.(game);
                     }}>Delete</Button>
                     <Button className="bg-blue-950 w-40" variant="default" onClick={() => {
-                        router.push(`/update?name=${encodeURIComponent(game.name)}&description=${encodeURIComponent(game.description)}&releaseDate=${encodeURIComponent(game.releaseDate)}&image=${encodeURIComponent(game.image)}&price=${encodeURIComponent(game.price)}&tag=${encodeURIComponent(game.tag)}`);
+                        router.push(`/update?id=${encodeURIComponent(game.id)}&name=${encodeURIComponent(game.name)}&description=${encodeURIComponent(game.description)}&releaseDate=${encodeURIComponent(game.releaseDate)}&image=${encodeURIComponent(game.image)}&price=${encodeURIComponent(game.price)}&tag=${encodeURIComponent(game.tag)}`);
                     }}>Update</Button>
                 </div>
             </div>

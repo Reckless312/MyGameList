@@ -2,7 +2,7 @@ import {NextResponse} from "next/server";
 
 const allowedOrigins = process.env.NODE_ENV === "production"
     ? ['https://my-game-list-sand.vercel.app']
-    : ['http://localhost:3000']
+    : ['http://localhost:3000', 'https://www.google.com']
 
 export function middleware(request: Request)
 {
@@ -16,7 +16,9 @@ export function middleware(request: Request)
             status: 400,
             statusText: "Bad Request",
             headers: {
-                'Content-Type': 'text/plain'
+                'Access-Control-Allow-Origin': `${allowedOrigins}`,
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
             }
         })
     }

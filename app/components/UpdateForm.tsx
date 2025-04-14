@@ -6,6 +6,7 @@ import InputComponent from "@/app/components/InputComponent";
 import {useGames} from "@/app/components/GamesContext";
 import {useRouter, useSearchParams} from "next/navigation";
 import {z, ZodFormattedError} from "zod"
+import {useStatus} from "@/app/components/ApplicationStatusContext";
 
 
 const schema = z.object({
@@ -21,7 +22,9 @@ const UpdateForm = ({query} : {query ? : string}) => {
     const searchParams = useSearchParams();
 
     const {updateGame, checkGame} = useGames() ?? {};
+    const { isNetworkUp, isServerUp } = useStatus() || {};
     const [game, setGame] = useState({
+        id: Number(searchParams.get("id")) ?? -1,
         name: searchParams.get("name") ?? "",
         description: searchParams.get("description") ?? "",
         image: searchParams.get("image") ?? "",
@@ -39,7 +42,7 @@ const UpdateForm = ({query} : {query ? : string}) => {
         setGame({...game, [e.target.name]: e.target.value});
     }
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if(!isNaN(Number(game.price))){
@@ -66,6 +69,13 @@ const UpdateForm = ({query} : {query ? : string}) => {
                 tag: errors?.tag ?? { _errors: [] },
             });
             return;
+        }
+
+        if (isServerUp && isNetworkUp) {
+            await fetch(`/api/games/`, {
+                method: 'PATCH',
+                body: JSON.stringify({id: game.id, name: game.name, description: game.description, image: game.image, releaseDate: game.releaseDate, price: game.price, tag: game.tag}),
+            });
         }
 
         updateGame?.(gameTitle.current, game);

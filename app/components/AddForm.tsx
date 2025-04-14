@@ -5,6 +5,7 @@ import Form from "next/form";
 import InputComponent from "@/app/components/InputComponent";
 import {useGames} from "@/app/components/GamesContext";
 import {useRouter} from "next/navigation";
+import { useStatus } from "@/app/components/ApplicationStatusContext";
 import {z, ZodFormattedError} from "zod"
 
 const schema = z.object({
@@ -18,7 +19,9 @@ const schema = z.object({
 
 const AddForm = ({query} : {query ? : string}) => {
     const {addGame, checkGame} = useGames() ?? {};
+    const { isNetworkUp, isServerUp } = useStatus() || {};
     const [game, setGame] = useState({
+        id: -1,
         name: "Baldur's Gate 3",
         description: "Baldur’s Gate 3 is a story-rich, party-based RPG set in the universe of Dungeons & Dragons, where your choices shape a tale of fellowship and betrayal, survival and sacrifice, and the lure of absolute power. ",
         image: "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg?t=1740386911",
@@ -34,7 +37,7 @@ const AddForm = ({query} : {query ? : string}) => {
         setGame({...game, [e.target.name]: e.target.value});
     }
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if(!isNaN(Number(game.price))){
@@ -61,6 +64,26 @@ const AddForm = ({query} : {query ? : string}) => {
                 tag: errors?.tag ?? { _errors: [] },
             });
             return;
+        }
+
+        if (isServerUp && isNetworkUp) {
+            await fetch(`/api/games/`, {
+                method: 'POST',
+                body: JSON.stringify({name: game.name, description: game.description, image: game.image, releaseDate: game.releaseDate, price: game.price, tag: game.tag}),
+            });
+
+            const response = await fetch(`/api/games/filter/`, {
+                method: 'POST',
+                body: JSON.stringify({name: game.name}),
+            });
+
+            const data = await response.json();
+
+            for (const jsonGame of data.rows) {
+                if (jsonGame.name == game.name) {
+                    game.id = jsonGame.id;
+                }
+            }
         }
 
         addGame?.(game);

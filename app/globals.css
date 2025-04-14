@@ -54,6 +54,9 @@
     @apply flex items-center gap-2 px-2;
   }
 
+  .component-down{
+    @apply text-white h-10 w-34 fixed bottom-0 right-0 m-10 bg-[#2F25B1] border rounded-4xl  flex items-center justify-center;
+  }
 }
 
 @layer base {

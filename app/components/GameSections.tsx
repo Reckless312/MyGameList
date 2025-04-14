@@ -1,10 +1,9 @@
 'use client'
 
-import React from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import GameCard from "@/app/components/GameCard";
 import {useGames} from "@/app/components/GamesContext";
 import {GameChart} from "@/app/components/GameChart";
-import {PaginationComponent} from "@/app/components/PaginationComponent";
 import {useSearchParams} from "next/navigation";
 
 const GameSections = ({query}: {query: string}) => {
@@ -19,9 +18,32 @@ const GameSections = ({query}: {query: string}) => {
     const currentPage = Number(searchParams.get("page")) || 1;
     const itemsOnPage = 10;
 
-    const startIndex = (currentPage - 1) * itemsOnPage;
+    const [visibleItems, setVisibleItems] = useState(currentPage * 10);
+    const loaderRef = useRef(null);
+
     const foundGames = games.filter(game => game.name.toLowerCase().includes(query.toLowerCase()))
-    const gamesOnPage = foundGames.slice(startIndex, startIndex + itemsOnPage);
+    const gamesOnPage = foundGames.slice(0, visibleItems);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            entries => {
+                const target = entries[0];
+                if (target.isIntersecting && gamesOnPage.length < foundGames.length) {
+                    setVisibleItems(prev => prev + itemsOnPage);
+                }
+            }, {threshold: 1}
+        );
+
+        if (loaderRef.current) {
+            observer.observe(loaderRef.current)
+        }
+
+        return () => {
+            if (loaderRef.current) {
+                observer.unobserve(loaderRef.current);
+            }
+        }
+    }, [gamesOnPage.length, foundGames.length])
 
     return (
         <>
@@ -56,8 +78,19 @@ const GameSections = ({query}: {query: string}) => {
                         <p>No games found</p>
                     )}
                 </ul>
+
+                {gamesOnPage.length < foundGames.length && (
+                    <div ref={loaderRef} className="flex justify-center items-center py-4 mt-4">
+                        <span className="text-gray-400">Scroll for more</span>
+                    </div>
+                )}
+
+                {gamesOnPage.length > 0 && gamesOnPage.length === foundGames.length && (
+                    <p className="text-center text-gray-400 mt-4 mb-8">
+                        {foundGames.length} {foundGames.length === 1 ? 'game' : 'games'} found
+                    </p>
+                )}
             </section>
-            <PaginationComponent query={query} page={currentPage} itemsOnPage={itemsOnPage} numberOfGames={foundGames.length}/>
         </>
     )
 }

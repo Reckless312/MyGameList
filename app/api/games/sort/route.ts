@@ -8,15 +8,13 @@ export async function GET(){
     try
     {
         const res = await client.query(selectQuery);
+        client.release();
 
         return NextResponse.json(res.rows);
     }
     catch
     {
-        return NextResponse.json({message: "Error happened while retrieving games"}, {status: 500});
-    }
-    finally
-    {
         client.release();
+        return NextResponse.json({message: "Error happened while retrieving games"}, {status: 500});
     }
 }

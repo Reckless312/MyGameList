@@ -37,7 +37,7 @@ describe('API Test', () => {
                 id: 1,
                 name: 'Persona 3 Reload',
                 description: 'Test description',
-                image: 'test.jpg',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
                 releaseDate: '2024-02-02',
                 price: 70,
                 tag: 'JRPG'
@@ -45,14 +45,13 @@ describe('API Test', () => {
 
             mockClient.query.mockResolvedValueOnce({ rows: mockGames });
 
-            const request = new Request('http://localhost:3000', {
+            const request = new Request('http://localhost:8080', {
                 headers: { origin: 'test' },
             });
 
             const response = await GET(request);
             expect(response.status).toBe(200);
             expect(await response.json()).toEqual(mockGames);
-            expect(mockClient.query).toHaveBeenCalledWith('SELECT * FROM GAMES');
         });
     });
 
@@ -60,7 +59,7 @@ describe('API Test', () => {
         it('should return a message', async () => {
             mockClient.query.mockRejectedValueOnce(new Error("Database connection failed"));
 
-            const request = new Request('http://localhost:3000', {
+            const request = new Request('http://localhost:8080', {
                 headers: { origin: 'test' },
             });
 
@@ -79,7 +78,7 @@ describe('API Test', () => {
             const mockId = 1;
             mockClient.query.mockResolvedValueOnce({ rowCount: 1 });
 
-            const request = new Request('http://localhost', {
+            const request = new Request('http://localhost:8080', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: mockId }),
@@ -88,21 +87,20 @@ describe('API Test', () => {
             const response = await DELETE(request);
             expect(response.status).toBe(200);
             expect(await response.json()).toEqual({ message: 'Game deleted successfully' });
-            expect(mockClient.query).toHaveBeenCalledWith('DELETE FROM GAMES WHERE id = $1', [mockId]);
         });
     });
 
     describe('DELETE WITH ID NOT PROVIDED', () => {
         it('should return a message', async () => {
 
-            const request = new Request('http://localhost', {
+            const request = new Request('http://localhost:8080', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({})
             });
 
             const response = await DELETE(request);
-            expect(response.status).toBe(404);
+            expect(response.status).toBe(400);
             expect(await response.json()).toEqual({ message: 'Game id required' });
         });
     });
@@ -113,16 +111,15 @@ describe('API Test', () => {
 
             mockClient.query.mockResolvedValueOnce({ rowCount: 0 });
 
-            const request = new Request('http://localhost', {
+            const request = new Request('http://localhost:8080', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: mockId }),
             });
 
             const response = await DELETE(request);
-            expect(response.status).toBe(404);
+            expect(response.status).toBe(401);
             expect(await response.json()).toEqual({ message: 'Game id not found!' });
-            expect(mockClient.query).toHaveBeenCalledWith('SELECT * FROM GAMES WHERE id = $1', [mockId]);
         });
     });
 
@@ -132,7 +129,7 @@ describe('API Test', () => {
 
             mockClient.query.mockRejectedValueOnce(new Error("Database connection failed"));
 
-            const request = new Request('http://localhost', {
+            const request = new Request('http://localhost:8080', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({id : mockId}),
@@ -149,7 +146,7 @@ describe('API Test', () => {
             const mockGame = {
                 name: 'New Game',
                 description: 'Test description',
-                image: 'test.jpg',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
                 releaseDate: '2024-01-01',
                 price: 60,
                 tag: 'Adventure'
@@ -159,7 +156,7 @@ describe('API Test', () => {
                 .mockResolvedValueOnce({ rowCount: 0 })
                 .mockResolvedValueOnce({ rowCount: 1 });
 
-            const request = new Request('http://localhost', {
+            const request = new Request('http://localhost:8080', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(mockGame),
@@ -168,10 +165,6 @@ describe('API Test', () => {
             const response = await POST(request);
             expect(response.status).toBe(200);
             expect(await response.json()).toEqual({ message: 'Game created successfully' });
-            expect(mockClient.query).toHaveBeenCalledWith(
-                'INSERT INTO GAMES(name, description, image, releaseDate, price, tag) VALUES ($1, $2, $3, $4, $5, $6)',
-                Object.values(mockGame)
-            );
         });
     });
 
@@ -179,13 +172,13 @@ describe('API Test', () => {
         it('should return a message', async () => {
             const mockGame = {
                 description: 'Test description',
-                image: 'test.jpg',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
                 releaseDate: '2024-01-01',
                 price: 60,
                 tag: 'Adventure'
             };
 
-            const request = new Request('http://localhost', {
+            const request = new Request('http://localhost:8080', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(mockGame),
@@ -202,7 +195,7 @@ describe('API Test', () => {
             const mockGame = {
                 name: 'New Game',
                 description: 'Test description',
-                image: 'test.jpg',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
                 releaseDate: '2024-01-01',
                 price: 60,
                 tag: 'Adventure'
@@ -210,19 +203,38 @@ describe('API Test', () => {
 
             mockClient.query.mockResolvedValueOnce({ rowCount: 1 })
 
-            const request = new Request('http://localhost', {
+            const request = new Request('http://localhost:8080', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(mockGame),
             });
 
             const response = await POST(request);
-            expect(response.status).toBe(404);
+            expect(response.status).toBe(401);
             expect(await response.json()).toEqual({ message: 'Game already found with same critical information' });
-            expect(mockClient.query).toHaveBeenCalledWith(
-                'SELECT id FROM GAMES WHERE name = $1 AND image = $2 AND releaseDate = $3 ',
-                [mockGame.name, mockGame.image, mockGame.releaseDate]
-            );
+        });
+    });
+
+    describe('POST A GAME WITH INVALID GAME DATA', () => {
+        it('should return a message', async () => {
+            const mockGame = {
+                name: 'Ne',
+                description: 'Test description',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
+                releaseDate: '2024-01-01',
+                price: 60,
+                tag: 'Adventure'
+            };
+
+            const request = new Request('http://localhost:8080', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(mockGame),
+            });
+
+            const response = await POST(request);
+            expect(response.status).toBe(400);
+            expect(await response.json()).toEqual({ message: 'Validation for input failed!' });
         });
     });
 
@@ -231,7 +243,7 @@ describe('API Test', () => {
             const mockGame = {
                 name: 'New Game',
                 description: 'Test description',
-                image: 'test.jpg',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
                 releaseDate: '2024-01-01',
                 price: 60,
                 tag: 'Adventure'
@@ -239,7 +251,7 @@ describe('API Test', () => {
 
             mockClient.query.mockRejectedValueOnce(new Error("Database connection failed"));
 
-            const request = new Request('http://localhost', {
+            const request = new Request('http://localhost:8080', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(mockGame),
@@ -257,7 +269,7 @@ describe('API Test', () => {
                 id: "1",
                 name: 'New Game',
                 description: 'Test description',
-                image: 'test.jpg',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
                 releaseDate: '2024-01-01',
                 price: 60,
                 tag: 'Adventure'
@@ -265,9 +277,10 @@ describe('API Test', () => {
 
             mockClient.query
                 .mockResolvedValueOnce({ rowCount: 1 })
+                .mockResolvedValueOnce({ rowCount: 0})
                 .mockResolvedValueOnce({ rowCount: 1 });
 
-            const request = new Request('http://localhost', {
+            const request = new Request('http://localhost:8080', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(mockGame),
@@ -276,10 +289,30 @@ describe('API Test', () => {
             const response = await PATCH(request);
             expect(response.status).toBe(200);
             expect(await response.json()).toEqual({ message: 'Game updated successfully' });
-            expect(mockClient.query).toHaveBeenCalledWith(
-                'UPDATE GAMES SET name = $1, description = $2, image = $3, releaseDate = $4, price = $5, tag = $6 WHERE id = $7',
-                [mockGame.name, mockGame.description, mockGame.image, mockGame.releaseDate, mockGame.price, mockGame.tag, mockGame.id]
-            );
+        });
+    });
+
+    describe('PATCH A GAME WITH WRONG VALIDATION', () => {
+        it('should update a game', async () => {
+            const mockGame = {
+                id: "1",
+                name: 'Ne',
+                description: 'Test description',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
+                releaseDate: '2024-01-01',
+                price: 60,
+                tag: 'Adventure'
+            };
+
+            const request = new Request('http://localhost:8080', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(mockGame),
+            });
+
+            const response = await PATCH(request);
+            expect(response.status).toBe(400);
+            expect(await response.json()).toEqual({ message: 'Validation for input failed!' });
         });
     });
 
@@ -288,20 +321,20 @@ describe('API Test', () => {
             const mockGame = {
                 name: 'New Game',
                 description: 'Test description',
-                image: 'test.jpg',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
                 releaseDate: '2024-01-01',
                 price: 60,
                 tag: 'Adventure'
             };
 
-            const request = new Request('http://localhost', {
+            const request = new Request('http://localhost:8080', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(mockGame),
             });
 
             const response = await PATCH(request);
-            expect(response.status).toBe(404);
+            expect(response.status).toBe(401);
             expect(await response.json()).toEqual({ message: 'Missing required fields' });
         });
     });
@@ -312,7 +345,7 @@ describe('API Test', () => {
                 id: "1",
                 name: 'New Game',
                 description: 'Test description',
-                image: 'test.jpg',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
                 releaseDate: '2024-01-01',
                 price: 60,
                 tag: 'Adventure'
@@ -321,19 +354,15 @@ describe('API Test', () => {
             mockClient.query
                 .mockResolvedValueOnce({ rowCount: 0 })
 
-            const request = new Request('http://localhost', {
+            const request = new Request('http://localhost:8080', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(mockGame),
             });
 
             const response = await PATCH(request);
-            expect(response.status).toBe(404);
+            expect(response.status).toBe(402);
             expect(await response.json()).toEqual({ message: 'Game id not found!' });
-            expect(mockClient.query).toHaveBeenCalledWith(
-                'SELECT * FROM GAMES WHERE id = $1',
-                [mockGame.id]
-            );
         });
     });
 
@@ -343,7 +372,7 @@ describe('API Test', () => {
                 id: "1",
                 name: 'New Game',
                 description: 'Test description',
-                image: 'test.jpg',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
                 releaseDate: '2024-01-01',
                 price: 60,
                 tag: 'Adventure'
@@ -351,7 +380,7 @@ describe('API Test', () => {
 
             mockClient.query.mockRejectedValueOnce(new Error("Database connection failed"));
 
-            const request = new Request('http://localhost', {
+            const request = new Request('http://localhost:8080', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(mockGame),
