@@ -67,13 +67,19 @@ const AddForm = ({query} : {query ? : string}) => {
         }
 
         if (isServerUp && isNetworkUp) {
-            await fetch(`/api/games/`, {
+            await fetch(`http://localhost:8080/api/games`, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({name: game.name, description: game.description, image: game.image, releaseDate: game.releaseDate, price: game.price, tag: game.tag}),
             });
 
-            const response = await fetch(`/api/games/filter/`, {
+            const response = await fetch(`http://localhost:8080/api/games/filter`, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({name: game.name}),
             });
 

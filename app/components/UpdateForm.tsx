@@ -72,9 +72,12 @@ const UpdateForm = ({query} : {query ? : string}) => {
         }
 
         if (isServerUp && isNetworkUp) {
-            await fetch(`/api/games/`, {
+            await fetch(`http://localhost:8080/api/games`, {
                 method: 'PATCH',
-                body: JSON.stringify({id: game.id, name: game.name, description: game.description, image: game.image, releaseDate: game.releaseDate, price: game.price, tag: game.tag}),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(game),
             });
         }
 

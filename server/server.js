@@ -104,7 +104,7 @@ app.route('/api/games')
     .patch(async (req, res) => {
         let client;
         try {
-            const validation = gameSchema.safeParse(req.body);
+            const validation = gameSchema.passthrough().safeParse(req.body);
 
             if (!validation.success) {
                 return res.status(400).json({ message: 'Validation for input failed!' });
