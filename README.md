@@ -1,5 +1,5 @@
 # MyGameList
 
 <h3>
-  The application can be easily runned thanks to vercel.
+  Implementation of backend has made the deployed frontend empty.
 </h3>
