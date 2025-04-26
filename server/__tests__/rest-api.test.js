@@ -5,7 +5,7 @@ global.TextEncoder = TextEncoder;
 const supertest = require('supertest');
 const {setPool, createOriginalPool} = require("../util/database");
 const {Client, Pool} = require("../__mocks__/pg");
-
+//
 jest.mock("pg");
 
 describe('API Test', () => {
