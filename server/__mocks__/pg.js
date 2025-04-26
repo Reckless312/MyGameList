@@ -1,5 +1,3 @@
-import {jest} from '@jest/globals';
-
 const mockClient = {
     query: jest.fn(),
     release: jest.fn(),
@@ -7,7 +5,7 @@ const mockClient = {
 };
 
 const mockPool = {
-    connect: jest.fn(() => mockClient),
+    connect: jest.fn().mockResolvedValue(mockClient), // Return a promise by default
     query: jest.fn(),
     end: jest.fn(),
 };

@@ -1,28 +1,21 @@
-/**
- * @jest-environment node
- */
-
-import '@testing-library/jest-dom';
-import { TextEncoder } from 'node:util';
-import {GET, POST, DELETE, PATCH} from '@/app/api/games/route';
-import {setPool} from "@/lib/data"
-import { Pool } from 'pg';
-import {afterEach, beforeEach, describe, expect, it, jest} from '@jest/globals'
-
-jest.mock('pg');
+const app = require('../');
+const { TextEncoder } = require('util');
 
 global.TextEncoder = TextEncoder;
+const supertest = require('supertest');
+const {setPool, createOriginalPool} = require("../util/database");
+const {Client, Pool} = require("../__mocks__/pg");
+
+jest.mock("pg");
 
 describe('API Test', () => {
-    let mockPool: any;
-    let mockClient: any;
+    let mockPool;
+    let mockClient;
 
     beforeEach(() => {
         mockPool = new Pool();
-        mockClient = {
-            query: jest.fn(),
-            release: jest.fn(),
-        };
+        mockClient = new Client();
+
         mockPool.connect.mockResolvedValue(mockClient);
         setPool(mockPool);
     });
@@ -30,6 +23,10 @@ describe('API Test', () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
+
+    afterAll(() => {
+        setPool(createOriginalPool());
+    })
 
     describe('GET', () => {
         it('should fetch all games', async () => {
@@ -45,13 +42,10 @@ describe('API Test', () => {
 
             mockClient.query.mockResolvedValueOnce({ rows: mockGames });
 
-            const request = new Request('http://localhost:8080', {
-                headers: { origin: 'test' },
-            });
+            const response = await supertest(app).get("/api/games")
 
-            const response = await GET(request);
             expect(response.status).toBe(200);
-            expect(await response.json()).toEqual(mockGames);
+            expect(await response.body).toEqual(mockGames);
         });
     });
 
@@ -59,15 +53,11 @@ describe('API Test', () => {
         it('should return a message', async () => {
             mockClient.query.mockRejectedValueOnce(new Error("Database connection failed"));
 
-            const request = new Request('http://localhost:8080', {
-                headers: { origin: 'test' },
-            });
-
-            const response = await GET(request);
+            const response = await supertest(app).get("/api/games")
 
             expect(response.status).toBe(500);
 
-            expect(await response.json()).toEqual({
+            expect(await response.body).toEqual({
                 message: "Error happened while retrieving games"
             });
         });
@@ -78,48 +68,33 @@ describe('API Test', () => {
             const mockId = 1;
             mockClient.query.mockResolvedValueOnce({ rowCount: 1 });
 
-            const request = new Request('http://localhost:8080', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: mockId }),
-            });
+            const response = await supertest(app).delete("/api/games").send({id: mockId});
 
-            const response = await DELETE(request);
             expect(response.status).toBe(200);
-            expect(await response.json()).toEqual({ message: 'Game deleted successfully' });
+            expect(await response.body).toEqual({ message: 'Game deleted successfully' });
         });
     });
 
     describe('DELETE WITH ID NOT PROVIDED', () => {
         it('should return a message', async () => {
 
-            const request = new Request('http://localhost:8080', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({})
-            });
+            const response = await supertest(app).delete("/api/games");
 
-            const response = await DELETE(request);
             expect(response.status).toBe(400);
-            expect(await response.json()).toEqual({ message: 'Game id required' });
+            expect(await response.body).toEqual({ message: 'Game id required' });
         });
     });
 
     describe('DELETE WITH ID NOT FOUND', () => {
         it('should return a message', async () => {
-            const mockId = 100;
+            const mockId = -100;
 
             mockClient.query.mockResolvedValueOnce({ rowCount: 0 });
 
-            const request = new Request('http://localhost:8080', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: mockId }),
-            });
+            const response = await supertest(app).delete("/api/games").send({id: mockId});
 
-            const response = await DELETE(request);
             expect(response.status).toBe(401);
-            expect(await response.json()).toEqual({ message: 'Game id not found!' });
+            expect(await response.body).toEqual({ message: 'Game id not found!' });
         });
     });
 
@@ -129,15 +104,10 @@ describe('API Test', () => {
 
             mockClient.query.mockRejectedValueOnce(new Error("Database connection failed"));
 
-            const request = new Request('http://localhost:8080', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({id : mockId}),
-            });
+            const response = await supertest(app).delete("/api/games").send({id: mockId});
 
-            const response = await DELETE(request);
             expect(response.status).toBe(500);
-            expect(await response.json()).toEqual({ message: 'Error happened while deleting game' });
+            expect(await response.body).toEqual({ message: 'Error happened while deleting game' });
         });
     });
 
@@ -156,15 +126,10 @@ describe('API Test', () => {
                 .mockResolvedValueOnce({ rowCount: 0 })
                 .mockResolvedValueOnce({ rowCount: 1 });
 
-            const request = new Request('http://localhost:8080', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mockGame),
-            });
+            const response = await supertest(app).post("/api/games").send(mockGame);
 
-            const response = await POST(request);
             expect(response.status).toBe(200);
-            expect(await response.json()).toEqual({ message: 'Game created successfully' });
+            expect(await response.body).toEqual({ message: 'Game created successfully' });
         });
     });
 
@@ -178,15 +143,10 @@ describe('API Test', () => {
                 tag: 'Adventure'
             };
 
-            const request = new Request('http://localhost:8080', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mockGame),
-            });
+            const response = await supertest(app).post("/api/games").send(mockGame);
 
-            const response = await POST(request);
             expect(response.status).toBe(404);
-            expect(await response.json()).toEqual({ message: 'Missing required fields' });
+            expect(await response.body).toEqual({ message: 'Missing required fields' });
         });
     });
 
@@ -203,15 +163,10 @@ describe('API Test', () => {
 
             mockClient.query.mockResolvedValueOnce({ rowCount: 1 })
 
-            const request = new Request('http://localhost:8080', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mockGame),
-            });
+            const response = await supertest(app).post("/api/games").send(mockGame);
 
-            const response = await POST(request);
             expect(response.status).toBe(401);
-            expect(await response.json()).toEqual({ message: 'Game already found with same critical information' });
+            expect(await response.body).toEqual({ message: 'Game already found with same critical information' });
         });
     });
 
@@ -226,15 +181,10 @@ describe('API Test', () => {
                 tag: 'Adventure'
             };
 
-            const request = new Request('http://localhost:8080', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mockGame),
-            });
+            const response = await supertest(app).post("/api/games").send(mockGame);
 
-            const response = await POST(request);
             expect(response.status).toBe(400);
-            expect(await response.json()).toEqual({ message: 'Validation for input failed!' });
+            expect(await response.body).toEqual({ message: 'Validation for input failed!' });
         });
     });
 
@@ -251,15 +201,10 @@ describe('API Test', () => {
 
             mockClient.query.mockRejectedValueOnce(new Error("Database connection failed"));
 
-            const request = new Request('http://localhost:8080', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mockGame),
-            });
+            const response = await supertest(app).post("/api/games").send(mockGame);
 
-            const response = await POST(request);
             expect(response.status).toBe(500);
-            expect(await response.json()).toEqual({ message: 'Error happened while creating game' });
+            expect(await response.body).toEqual({ message: 'Error happened while creating game' });
         });
     });
 
@@ -280,15 +225,10 @@ describe('API Test', () => {
                 .mockResolvedValueOnce({ rowCount: 0})
                 .mockResolvedValueOnce({ rowCount: 1 });
 
-            const request = new Request('http://localhost:8080', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mockGame),
-            });
+            const response = await supertest(app).patch("/api/games").send(mockGame);
 
-            const response = await PATCH(request);
             expect(response.status).toBe(200);
-            expect(await response.json()).toEqual({ message: 'Game updated successfully' });
+            expect(await response.body).toEqual({ message: 'Game updated successfully' });
         });
     });
 
@@ -304,15 +244,10 @@ describe('API Test', () => {
                 tag: 'Adventure'
             };
 
-            const request = new Request('http://localhost:8080', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mockGame),
-            });
+            const response = await supertest(app).patch("/api/games").send(mockGame);
 
-            const response = await PATCH(request);
             expect(response.status).toBe(400);
-            expect(await response.json()).toEqual({ message: 'Validation for input failed!' });
+            expect(await response.body).toEqual({ message: 'Validation for input failed!' });
         });
     });
 
@@ -327,15 +262,10 @@ describe('API Test', () => {
                 tag: 'Adventure'
             };
 
-            const request = new Request('http://localhost:8080', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mockGame),
-            });
+            const response = await supertest(app).patch("/api/games").send(mockGame);
 
-            const response = await PATCH(request);
             expect(response.status).toBe(401);
-            expect(await response.json()).toEqual({ message: 'Missing required fields' });
+            expect(await response.body).toEqual({ message: 'Missing required fields' });
         });
     });
 
@@ -354,15 +284,10 @@ describe('API Test', () => {
             mockClient.query
                 .mockResolvedValueOnce({ rowCount: 0 })
 
-            const request = new Request('http://localhost:8080', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mockGame),
-            });
+            const response = await supertest(app).patch("/api/games").send(mockGame);
 
-            const response = await PATCH(request);
             expect(response.status).toBe(402);
-            expect(await response.json()).toEqual({ message: 'Game id not found!' });
+            expect(await response.body).toEqual({ message: 'Game id not found!' });
         });
     });
 
@@ -380,15 +305,91 @@ describe('API Test', () => {
 
             mockClient.query.mockRejectedValueOnce(new Error("Database connection failed"));
 
-            const request = new Request('http://localhost:8080', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mockGame),
-            });
+            const response = await supertest(app).patch("/api/games").send(mockGame);
 
-            const response = await PATCH(request);
             expect(response.status).toBe(500);
-            expect(await response.json()).toEqual({ message: 'Error happened while updating the game' });
+            expect(await response.body).toEqual({ message: 'Error happened while updating the game' });
+        });
+    });
+
+    describe('POST', () => {
+        it('should get games that contain the name', async () => {
+            const mockGameName = "New game";
+            const mockGames = [
+                {id: 1, name: 'New Game 1'},
+                {id: 2, name: 'New Game 2'},
+                {id: 3, name: 'New Game 3'},
+            ]
+
+            mockClient.query.mockResolvedValueOnce({rows: mockGames, rowCount: mockGames.length });
+
+            const response = await supertest(app).post("/api/games/filter").send({name: mockGameName});
+
+            expect(response.status).toBe(200);
+            expect(await response.body).toEqual(mockGames);
+            expect(mockClient.query).toHaveBeenCalledWith(
+                'SELECT * FROM games WHERE LOWER(name) LIKE \'%\' || LOWER($1) || \'%\'',
+                [mockGameName]
+            );
+        });
+    });
+
+    describe('POST WITH AN ARGUMENT MISSING', () => {
+        it('should return a message', async () => {
+            const mockGame = {
+            };
+
+            const response = await supertest(app).post("/api/games/filter").send(mockGame);
+            expect(response.status).toBe(404);
+            expect(await response.body).toEqual({ message: 'Missing required fields' });
+        });
+    });
+
+    describe('POST WITH AN ERROR', () => {
+        it('should return a message', async () => {
+            const mockGame = {
+                name: 'New Game',
+            };
+
+            mockClient.query.mockRejectedValueOnce(new Error("Database connection failed"));
+
+            const response = await supertest(app).post("/api/games/filter").send(mockGame);
+
+            expect(response.status).toBe(500);
+            expect(await response.body).toEqual({ message: 'Error happened while filtering games' });
+        });
+    });
+
+    describe('GET', () => {
+        it('should fetch all games', async () => {
+            const mockGames = [
+                {id: 1, name: 'Persona 3 Reload'},
+                {id: 2, name: 'Minecraft'},];
+
+            const expectedMockGames = [
+                {id: 2, name: 'Minecraft'},
+                {id: 1, name: 'Persona 3 Reload'}];
+
+            mockClient.query.mockResolvedValueOnce({ rows: expectedMockGames });
+
+            const response = await supertest(app).get("/api/games/sort").send(mockGames);
+            expect(response.status).toBe(200);
+            expect(await response.body).toEqual(expectedMockGames);
+            expect(mockClient.query).toHaveBeenCalledWith('SELECT * FROM games ORDER BY name');
+        });
+    });
+
+    describe('GET Error', () => {
+        it('should return a message', async () => {
+            mockClient.query.mockRejectedValueOnce(new Error("Database connection failed"));
+
+            const response = await supertest(app).get("/api/games/sort");
+
+            expect(response.status).toBe(500);
+
+            expect(await response.body).toEqual({
+                message: "Error happened while retrieving games"
+            });
         });
     });
 });

@@ -1,13 +1,11 @@
 require('dotenv').config({ path: '../.env.local' });
 const express = require('express');
 const cors = require('cors');
-const { Pool } = require('pg');
 const { z } = require('zod');
+const {getPool} = require("./util/database");
 
 const app = express();
 const port = 8080;
-
-const pool = new Pool({connectionString: process.env.DATABASE_URL,});
 
 const allowedOrigins = ['http://localhost:3000', 'https://www.google.com', 'http://localhost:8080'];
 
@@ -32,7 +30,7 @@ app.route('/api/games')
     .get(async (req, res) => {
         let client;
         try {
-            client = await pool.connect();
+            client = await getPool().connect();
             const result = await client.query('SELECT * FROM games');
             res.json(result.rows);
         } catch (error) {
@@ -45,6 +43,11 @@ app.route('/api/games')
     .post(async (req, res) => {
         let client;
         try {
+            if (req.body === undefined || req.body?.name === undefined || req.body?.description === undefined || req.body?.image === undefined || req.body?.releaseDate === undefined || req.body?.price === undefined || req.body?.tag === undefined)
+            {
+                return res.status(404).json({ message: 'Missing required fields' });
+            }
+
             const validation = gameSchema.safeParse(req.body);
             if (!validation.success) {
                 return res.status(400).json({ message: 'Validation for input failed!' });
@@ -52,11 +55,7 @@ app.route('/api/games')
 
             const { name, description, image, releaseDate, price, tag } = req.body;
 
-            if (name === undefined || description === undefined || image === undefined || releaseDate === undefined || price === undefined || tag === undefined) {
-                return res.status(404).json({ message: 'Missing required fields' });
-            }
-
-            client = await pool.connect();
+            client = await getPool().connect();
 
             const existing = await client.query('SELECT id FROM games WHERE name = $1', [name]);
 
@@ -76,14 +75,15 @@ app.route('/api/games')
     }).delete(async (req, res) => {
         let client;
         try {
-            const { id } = req.body;
 
-            if (id === undefined)
+            if (req.body === undefined)
             {
                 return res.status(400).json({ message: 'Game id required' });
             }
 
-            client = await pool.connect();
+            const { id } = req.body;
+
+            client = await getPool().connect();
 
             const existing = await client.query('SELECT * FROM games WHERE id = $1', [id]);
 
@@ -106,20 +106,18 @@ app.route('/api/games')
         try {
             const validation = gameSchema.safeParse(req.body);
 
-            console.log(req.body);
-
             if (!validation.success) {
                 return res.status(400).json({ message: 'Validation for input failed!' });
             }
 
-            const {id, name, description, image, releaseDate, price, tag } = req.body;
-
-            if (id === undefined || name === undefined || description === undefined || image === undefined || releaseDate === undefined || price === undefined || tag === undefined)
+            if (req.body === undefined || req.body?.id === undefined || req.body?.name === undefined || req.body?.description === undefined || req.body?.image === undefined || req.body?.releaseDate === undefined || req.body?.price === undefined || req.body?.tag === undefined)
             {
                 return res.status(401).json({ message: 'Missing required fields' });
             }
 
-            client = await pool.connect();
+            const {id, name, description, image, releaseDate, price, tag } = req.body;
+
+            client = await getPool().connect();
 
             const existing = await client.query('SELECT * FROM games WHERE id = $1', [id]);
 
@@ -148,12 +146,13 @@ app.route('/api/games/filter')
     .post(async (req, res) => {
         let client;
         try {
-            const { name } = req.body;
-            if (name === undefined) {
+            if (req.body === undefined || req.body?.name === undefined) {
                 return res.status(404).json({ message: 'Missing required fields' });
             }
 
-            client = await pool.connect();
+            const { name } = req.body;
+
+            client = await getPool().connect();
             const result = await client.query(`SELECT * FROM games WHERE LOWER(name) LIKE '%' || LOWER($1) || '%'`, [name]);
 
             res.json(result.rows);
@@ -169,7 +168,7 @@ app.route('/api/games/sort')
     .get(async (req, res) => {
         let client;
         try {
-            client = await pool.connect();
+            client = await getPool().connect();
             const result = await client.query('SELECT * FROM games ORDER BY name');
             res.json(result.rows);
         } catch (error) {
