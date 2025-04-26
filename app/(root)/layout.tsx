@@ -6,7 +6,7 @@ import React from "react";
 import {auth} from "@/auth";
 import {GamesProvider} from "@/app/components/GamesContext";
 import {ApplicationStatusProvider} from "@/app/components/ApplicationStatusContext";
-import NetworkStatus from "@/app/components/NetworkStatus";
+import ServerAndNetworkStatus from "@/app/components/ServerAndNetworkStatus";
 import GameManager from "@/app/components/GameManager";
 
 export default async function Layout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -22,7 +22,7 @@ export default async function Layout({ children }: Readonly<{ children: React.Re
                             <div className="flex-1 bg-black">{children}</div>
                             <Footer />
                             <GameManager/>
-                            <NetworkStatus/>
+                            <ServerAndNetworkStatus/>
                         </GamesProvider>
                     </ApplicationStatusProvider>
                 </main>

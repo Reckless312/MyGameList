@@ -5,20 +5,15 @@ const { Pool } = require('pg');
 const { z } = require('zod');
 
 const app = express();
-const port = process.env.PORT || 8080;
+const port = 8080;
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+const pool = new Pool({connectionString: process.env.DATABASE_URL,});
 
-const allowedOrigins = process.env.NODE_ENV === 'production'
-    ? ['https://my-game-list-sand.vercel.app']
-    : ['http://localhost:3000', 'https://www.google.com', 'http://localhost:8080'];
+const allowedOrigins = ['http://localhost:3000', 'https://www.google.com', 'http://localhost:8080'];
 
 app.use(cors({
     origin: allowedOrigins,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
@@ -57,8 +52,7 @@ app.route('/api/games')
 
             const { name, description, image, releaseDate, price, tag } = req.body;
 
-            if (name === undefined || description === undefined || image === undefined || releaseDate === undefined || price === undefined || tag === undefined)
-            {
+            if (name === undefined || description === undefined || image === undefined || releaseDate === undefined || price === undefined || tag === undefined) {
                 return res.status(404).json({ message: 'Missing required fields' });
             }
 

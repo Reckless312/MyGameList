@@ -3,7 +3,7 @@
 import {useEffect } from 'react';
 import {useStatus} from "@/app/components/ApplicationStatusContext";
 
-export default function NetworkStatus() {
+export default function ServerAndNetworkStatus() {
     const {isServerUp, isNetworkUp, ChangeNetworkStatus, ChangeServerStatus} = useStatus() || {};
     useEffect(() => {
         const checkNetworkStatus = async () => {
