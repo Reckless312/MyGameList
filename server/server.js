@@ -188,7 +188,7 @@ const filesPayloadExists = (req, res, next) => {
     next();
 }
 
-const MB = 5;
+const MB = 2048;
 const FILE_SIZE_LIMIT = MB * 1024 * 1024;
 
 const fileSizeLimiter = (req, res, next) => {
@@ -244,7 +244,7 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 })
 
-app.post('/upload', fileUpload({createParentPath: true}), filesPayloadExists, fileExtLimiter(['.png', '.jpg', 'jpeg']), fileSizeLimiter, (req, res) => {
+app.post('/upload', fileUpload({createParentPath: true}), filesPayloadExists, fileExtLimiter(['.png', '.jpg', 'jpeg', '.mkv']), fileSizeLimiter, (req, res) => {
     const files = req.files;
 
     Object.keys(files).forEach(key => {
