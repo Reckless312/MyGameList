@@ -63,13 +63,15 @@
             h3.textContent = json?.message;
         }
 
-        form.addEventListener('submit', (event) => {
+        form.addEventListener('submit', async (event) => {
             event.preventDefault();
-            sendFiles();
-            showFiles();
+            await sendFiles();
+            await showFiles();
         });
 
         const body = document.querySelector('body');
+
+        const added = [];
 
         const showFiles = async () => {
             const response = await fetch('http://localhost:8080/files');
@@ -79,16 +81,22 @@
 
             const files = json.files;
 
+            for (const htmlElement of added) {
+                body.removeChild(htmlElement);
+            }
+
             for (const file of files) {
                 console.log(file);
                 const a = document.createElement('a');
                 a.href = `http://localhost:8080/download?file=${file}`;
                 a.innerText = file;
+                const br = document.createElement('br');
+                added.push(a);
+                added.push(br);
                 body.appendChild(a);
-                body.appendChild(document.createElement('br'));
+                body.appendChild(br);
             }
         }
-
         showFiles();
     </script>
 </body>

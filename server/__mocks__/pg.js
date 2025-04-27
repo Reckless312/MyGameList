@@ -5,7 +5,7 @@ const mockClient = {
 };
 
 const mockPool = {
-    connect: jest.fn().mockResolvedValue(mockClient), // Return a promise by default
+    connect: jest.fn().mockResolvedValue(mockClient),
     query: jest.fn(),
     end: jest.fn(),
 };
