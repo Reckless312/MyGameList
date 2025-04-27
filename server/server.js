@@ -3,6 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const { z } = require('zod');
 const {getPool} = require("./util/database");
+const fileUpload = require("express-fileupload");
+const path = require("node:path");
+const {readdir} = require("node:fs");
+const fs = require("node:fs");
 
 const app = express();
 const port = 8080;
@@ -178,6 +182,105 @@ app.route('/api/games/sort')
             client?.release();
         }
     })
+
+const filesPayloadExists = (req, res, next) => {
+    if (!req.files) return res.status(400).json({ status: "error", message: "Missing files" });
+    next();
+}
+
+const MB = 5;
+const FILE_SIZE_LIMIT = MB * 1024 * 1024;
+
+const fileSizeLimiter = (req, res, next) => {
+    const files = req.files;
+
+    const filesOverLimit = [];
+
+    Object.keys(files).forEach(key => {
+        if (files[key].size > FILE_SIZE_LIMIT) {
+            filesOverLimit.push(files[key].name);
+        }
+    })
+
+    if (filesOverLimit.length) {
+        const properVerb = filesOverLimit.length > 1 ? 'are' : 'is';
+
+        const sentence = `Upload failed. ${filesOverLimit.toString()} ${properVerb} over the file
+        size limit of ${MB} MB.`.replaceAll(",", ", ");
+
+        const message = filesOverLimit.length < 3
+        ? sentence.replace(",", " and")
+        : sentence.replace(/, (?=[^,]*$)/, " and");
+
+        return res.status(413).json({status: "error", message});
+    }
+
+    next();
+}
+
+const fileExtLimiter = (allowedExtArray) => {
+    return (req, res, next) => {
+        const files = req.files;
+
+        const fileExtensions = [];
+
+        Object.keys(files).forEach(key => {
+            fileExtensions.push(path.extname(files[key].name));
+        })
+
+        const allowed = fileExtensions.every(ext => allowedExtArray.includes(ext));
+
+        if(!allowed){
+            const message = `Upload failed. Only ${allowedExtArray.toString()} files allowed.`.replaceAll(",", ", ");
+
+            return res.status(422).json({status: "error", message});
+        }
+
+        next();
+    }
+}
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+})
+
+app.post('/upload', fileUpload({createParentPath: true}), filesPayloadExists, fileExtLimiter(['.png', '.jpg', 'jpeg']), fileSizeLimiter, (req, res) => {
+    const files = req.files;
+
+    Object.keys(files).forEach(key => {
+        const filepath = path.join(__dirname, 'files', files[key].name);
+        files[key].mv(filepath, (err) => {
+            if (err) return res.status(500).json({status: "error", message: err});
+        });
+    })
+
+    return res.json({status: "success", message: Object.keys(files).toString()});
+});
+
+app.get('/files', (req, res) => {
+    const fileDirectory = path.join(__dirname, 'files');
+
+    readdir(fileDirectory, (_, fileDirectory) => {
+        console.log(fileDirectory);
+
+        return res.json({status: "success", files: fileDirectory});
+    })
+});
+
+app.get('/download', (req, res) => {
+    const file = req.query;
+
+    console.log(file.file);
+
+    const filePath = path.join(__dirname, 'files', file.file);
+
+    if (fs.existsSync(filePath)) {
+        res.download(filePath);
+    }
+    else{
+        res.status(404).json({ message: 'File not found!' });
+    }
+})
 
 module.exports = app;
 
