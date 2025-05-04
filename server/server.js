@@ -1,12 +1,12 @@
 const express = require('express');
-
-const app = express();
-const port = 8080;
 const gamesRoute = require("./api/games");
 const filesRoute = require("./api/files");
 const cors = require("cors");
+const {connectToDatabase, initializeTables} = require("./sequalize")
 
 const allowedOrigins = ['http://localhost:3000', 'https://www.google.com', 'http://localhost:8080'];
+const app = express();
+const port = 8080;
 
 app.use(cors({
     origin: allowedOrigins,
@@ -21,6 +21,9 @@ app.use('/', filesRoute);
 
 module.exports = app;
 
-app.listen(port, () => {
+app.listen(port, async () => {
+    await connectToDatabase();
+    await initializeTables();
+
     console.log(`Server running on port ${port}`);
 });
