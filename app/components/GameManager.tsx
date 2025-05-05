@@ -14,7 +14,14 @@ export default function GameManager() {
             try {
                 const response = await fetch("http://localhost:8080/api/games");
                 const games = await response.json();
-                addMultipleGames?.(games);
+
+                const mergedGames = []
+                for(const game of games) {
+                    const description = game.GAME_DESCRIPTIONs[0].description;
+                    const image = game.GAME_IMAGEs[0].image;
+                    mergedGames.push({"id": game.id, "name": game.name, "description": description, "image": image, "price": game.price, "tag": game.tag, "releaseDate": game.releaseDate});
+                }
+                addMultipleGames?.(mergedGames);
             } catch (e) {
                 console.error(e);
             }
