@@ -1,12 +1,24 @@
 const {Sequelize, DataTypes} = require("sequelize");
 const {Op} = require("@sequelize/core")
+const {faker} = require("@faker-js/faker")
 
-// const generateGames = (nrFakeEntities) => {
-//
-//     for (let i = 0; i < nrFakeEntities; i++) {
-//         // TO DO WHEN CHANGING CURRENT DATABASE
-//     }
-// }
+async function generateEntities(size){
+    for (let i = 0; i < size; i++) {
+        const name = faker.word.sample();
+        const releaseDate = faker.date.past().toISOString().split('T')[0];
+        const price = faker.number.float();
+        const tag = faker.word.sample();
+        const description = faker.word.sample();
+        const image = faker.image.url();
+
+        try{
+            await createNewGame(name, description, image, tag, price, releaseDate);
+        }catch{
+        }
+
+        console.log(i);
+    }
+}
 
 const sequelize = new Sequelize(process.env.DATABASE_URL, {logging: false});
 
@@ -19,6 +31,7 @@ const Game = sequelize.define('GAME', {
     name: {
         type: DataTypes.TEXT,
         allowNull: false,
+        index: true,
     },
     releaseDate: {
         type: DataTypes.DATEONLY,
@@ -79,7 +92,7 @@ async function initializeTables(){
 }
 
 async function returnGames(){
-    return await Game.findAll({include: [{model: GameDescription}, {model: GameImage}]});
+    return await Game.findAll({include: [{model: GameDescription, attributes: ['description']}, {model: GameImage, attributes: ['image']}]});
 }
 
 async function findGameByName(name){
@@ -119,7 +132,7 @@ async function findGameById(id){
             id: id
         },
         attributes: ['id'],
-        include: [{model: GameDescription}, {model: GameImage}]
+        include: [{model: GameDescription, attributes: ['description']}, {model: GameImage, attributes: ['image']}]
     })
 }
 
@@ -136,7 +149,7 @@ async function findGameByNameWithDifferentId(name, id){
             id: {[Op.ne]: id}
         },
         attributes: ['id'],
-        include: [{model: GameDescription}, {model: GameImage}]
+        include: [{model: GameDescription, attributes: ['description']}, {model: GameImage, attributes: ['image']}]
     })
 }
 
@@ -169,18 +182,18 @@ async function findGamesByName(name){
                 [Op.iLike]: `%${name}%`
             }
         },
-        include: [{model: GameDescription}, {model: GameImage}]
+        include: [{model: GameDescription, attributes: ['description']}, {model: GameImage, attributes: ['image']}]
     })
 }
 
 async function getGamesOrderedByName(){
     return await Game.findAll({
         order: [['name', 'ASC']],
-        include: [{model: GameDescription}, {model: GameImage}]
+        include: [{model: GameDescription, attributes: ['description']}, {model: GameImage, attributes: ['image']}]
     })
 }
 
 module.exports = {
     Game, GameImage, GameDescription, connectToDatabase, initializeTables, returnGames, findGameByName, createNewGame, findGameById,
-    deleteGameById, findGameByNameWithDifferentId, updateGame, findGamesByName, getGamesOrderedByName
+    deleteGameById, findGameByNameWithDifferentId, updateGame, findGamesByName, getGamesOrderedByName, generateEntities
 }
