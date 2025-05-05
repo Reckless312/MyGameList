@@ -14,12 +14,15 @@ export default function GameManager() {
             try {
                 const response = await fetch("http://localhost:8080/api/games");
                 const games = await response.json();
-
                 const mergedGames = []
                 for(const game of games) {
-                    const description = game.GAME_DESCRIPTIONs[0].description;
-                    const image = game.GAME_IMAGEs[0].image;
-                    mergedGames.push({"id": game.id, "name": game.name, "description": description, "image": image, "price": game.price, "tag": game.tag, "releaseDate": game.releaseDate});
+                    // Possible bug here, since elements from the database should have always the game descriptions, but they don't receive
+                    // it here
+                    if (game.GAME_DESCRIPTIONs[0] && game.GAME_IMAGEs[0]){
+                        const description = game.GAME_DESCRIPTIONs[0].description;
+                        const image = game.GAME_IMAGEs[0].image;
+                        mergedGames.push({"id": game.id, "name": game.name, "description": description, "image": image, "price": game.price, "tag": game.tag, "releaseDate": game.releaseDate});
+                    }
                 }
                 addMultipleGames?.(mergedGames);
             } catch (e) {
