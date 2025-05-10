@@ -1,6 +1,7 @@
 'use client'
 
 import React, {createContext, useState, useContext, ReactNode} from "react";
+import {useStatus} from "@/app/components/ApplicationStatusContext";
 
 export type Game = {
     id: number;
@@ -14,56 +15,139 @@ export type Game = {
 
 type GamesContextType = {
     games: Game[];
-    addGame: (newGame: Game) => void;
+    addGame: (newGame: Game) => Promise<void>;
     addMultipleGames: (games: Game[]) => void;
-    removeGame: (removableGame: Game) => void;
-    checkGame: (game: Game) => number;
-    updateGame: (gameTitle: string | null, updatedGame: Game) => void;
-    sortGames: () => void;
+    removeGame: (removableGame: Game) => Promise<void>;
+    checkGame: (game: Game) => Promise<boolean>;
+    checkGameLocally: (game: Game) => boolean;
+    updateGame: (gameTitle: string | null, updatedGame: Game) => Promise<void>;
+    sortGamesByName: () => void;
+    sortGamesByPrice: () => void;
     getOldestGame: () => Game | undefined;
     getEarliestGame: () => Game | undefined;
     getAverageGameByDate: () => Game | undefined;
+    setNewGames: (games: Game[]) => void;
+    fetchGameByName: (name: string) => Promise<Game>;
+    setNewRemovableGames: (games: Game[]) => void;
+    getRemovableGames: () => Game[];
 }
 
-let sortAscending = true;
+let sortByNameAscending = true;
+let sortByPriceAscending = true;
 
 const GamesContext = createContext<GamesContextType | undefined>(undefined);
 
 export function GamesProvider({children}: {children: ReactNode}) {
     const [games, setGames] = useState<Game[]>([]);
+    const [removableGames, setRemovableGames] = useState<Game[]>([]);
+    const { isNetworkUp, isServerUp } = useStatus() || {};
 
-    const addGame = (newGame: Game) => {
-        setGames([...games, newGame]);
+    const addGame = async (game: Game) => {
+        if (isServerUp && isNetworkUp) {
+            const checkGame = await fetchGameByName(game.name);
+
+            if (checkGame !== null) {
+                return;
+            }
+
+            await fetch(`http://localhost:8080/api/games`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({name: game.name, description: game.description, image: game.image, releaseDate: game.releaseDate, price: game.price, tag: game.tag}),
+            });
+            const foundGame = await fetchGameByName(game.name);
+            game.id = foundGame.id;
+        }
+
+        // TO DO: If the server is down, games will be added with id -1, need to change once the server is back up
+        setGames([...games, game]);
     }
 
     const addMultipleGames = (newGames: Game[]) => {
         setGames([...games, ...newGames]);
     }
 
-    const removeGame = (game: Game) => {
+    const removeGame = async (game: Game) => {
+        if (isServerUp && isNetworkUp) {
+            await fetch(`http://localhost:8080/api/games`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({id: game.id}),
+            });
+        }
+        else{
+            setRemovableGames([...removableGames, game]);
+        }
+
         setGames([...games.filter((inListGame) => inListGame.name !== game.name)]);
     }
 
-    const checkGame = (game: Game) => {
-        return games.filter((inListGame) => inListGame.name === game.name).length;
+    const checkGame = async (game: Game) => {
+        if(isServerUp && isNetworkUp) {
+            const foundGame = await fetchGameById(game.id);
+            return foundGame !== null;
+        }
+        return checkGameLocally(game);
     }
 
-    const updateGame = (gameTitle: string | null, updatedGame: Game) => {
+    const checkGameLocally = (game: Game) => {
+        return games.filter((inListGame) => inListGame.name === game.name).length > 0;
+    }
+
+    const updateGame = async (gameTitle: string | null, updatedGame: Game) => {
+        if (isServerUp && isNetworkUp) {
+            const checkGame = await fetchGameByName(updatedGame.name);
+
+            if (checkGame !== null) {
+                return;
+            }
+
+            await fetch(`http://localhost:8080/api/games`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedGame),
+            });
+        }
+
+        //TO DO: Fix the id -1 thing so we won't get issues when offline and add + update are performed
         setGames(games.map((inListGame) => inListGame.name === gameTitle ? updatedGame : inListGame));
     }
 
-    const sortGames = () => {
+    const sortGamesByName = () => {
         const sortedGames = [...games];
 
-        if(sortAscending){
-            sortedGames.sort((a, b) => a.name.localeCompare(b.name))
+        switch(sortByNameAscending){
+            case true:
+                sortedGames.sort((a, b) => a.name.localeCompare(b.name))
+                break;
+            case false:
+                sortedGames.sort((a, b) => b.name.localeCompare(a.name));
+                break;
         }
-        else{
-            sortedGames.sort((a, b) => b.name.localeCompare(a.name));
-        }
-
-        sortAscending = !sortAscending;
         setGames(sortedGames);
+
+        sortByNameAscending = !sortByNameAscending;
+    }
+
+    const sortGamesByPrice = () => {
+        const sortedGames = [...games];
+
+        switch(sortByPriceAscending){
+            case true:
+                sortedGames.sort((a, b) => a.price - b.price);
+                break;
+            case false:
+                sortedGames.sort((a, b) => b.price - a.price);
+                break;
+        }
+        setGames(sortedGames);
+        sortByPriceAscending = !sortByPriceAscending;
     }
 
     const getOldestGame = () => {
@@ -71,6 +155,7 @@ export function GamesProvider({children}: {children: ReactNode}) {
         if(localGames.length == 0) {
             return undefined;
         }
+
         return localGames.reduce((maxGame, currentGame) => maxGame.releaseDate > currentGame.releaseDate ? currentGame : maxGame, games[0])
     }
 
@@ -87,11 +172,49 @@ export function GamesProvider({children}: {children: ReactNode}) {
         if(localGames.length == 0) {
             return undefined;
         }
+
         return localGames.sort((a, b) => a.releaseDate.localeCompare(b.releaseDate)).at(Math.floor(localGames.length / 2));
     }
 
+    const fetchGameById = async (id: number) => {
+        const response = await fetch(`http://localhost:8080/api/games/filter/id`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({id: id}),
+        });
+        console.log(id);
+        const data = await response.json();
+        return data.length > 0 ? data[0] : null;
+    }
+
+    const fetchGameByName = async (name: string) => {
+        const response = await fetch(`http://localhost:8080/api/games/filter`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({name: name}),
+        });
+        const data = await response.json();
+        return data.length > 0 ? data[0] : null;
+    }
+
+    const setNewGames = (newGames: Game[]) => {
+        setGames(newGames);
+    }
+
+    const getRemovableGames = () => {
+        return removableGames;
+    }
+
+    const setNewRemovableGames = (games: Game[])=> {
+        setRemovableGames(games);
+    }
+
     return (
-        <GamesContext.Provider value={{games, addGame, addMultipleGames, removeGame, checkGame, updateGame, sortGames, getOldestGame, getEarliestGame, getAverageGameByDate}}>
+        <GamesContext.Provider value={{games, addGame, addMultipleGames, removeGame, checkGame, updateGame, sortGamesByName, sortGamesByPrice, getOldestGame, getEarliestGame, getAverageGameByDate, setNewGames, fetchGameByName, getRemovableGames, setNewRemovableGames, checkGameLocally}}>
             {children}
         </GamesContext.Provider>
     );

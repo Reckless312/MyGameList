@@ -3,12 +3,10 @@ import Image from "next/image";
 import {useGames} from "@/app/components/GamesContext";
 import {useRouter} from "next/navigation";
 import { Button } from "@/components/ui/button"
-import {useStatus} from "@/app/components/ApplicationStatusContext";
 
 const GameCard = ({game, background}: {game: { id: number; image: string; name: string; description: string; releaseDate: string ; price: number; tag: string;}, background: string}) => {
     const {removeGame} = useGames() ?? {};
     const router = useRouter();
-    const { isNetworkUp, isServerUp } = useStatus() || {};
 
     return (
         <li>
@@ -25,16 +23,7 @@ const GameCard = ({game, background}: {game: { id: number; image: string; name: 
                 </div>
                 <div className="ml-5 mr-5 flex flex-col gap-y-4 items-center justify-center">
                     <Button className="bg-red-600 w-40 on hover:bg-red-950" variant="default" onClick={async () => {
-                        if (isServerUp && isNetworkUp) {
-                            await fetch(`http://localhost:8080/api/games`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({id: game.id}),
-                            });
-                        }
-                        removeGame?.(game);
+                        await removeGame?.(game);
                     }}>Delete</Button>
                     <Button className="bg-blue-950 w-40" variant="default" onClick={() => {
                         router.push(`/update?id=${encodeURIComponent(game.id)}&name=${encodeURIComponent(game.name)}&description=${encodeURIComponent(game.description)}&releaseDate=${encodeURIComponent(game.releaseDate)}&image=${encodeURIComponent(game.image)}&price=${encodeURIComponent(game.price)}&tag=${encodeURIComponent(game.tag)}`);

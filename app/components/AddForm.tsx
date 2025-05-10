@@ -5,7 +5,6 @@ import Form from "next/form";
 import InputComponent from "@/app/components/InputComponent";
 import {useGames} from "@/app/components/GamesContext";
 import {useRouter} from "next/navigation";
-import { useStatus } from "@/app/components/ApplicationStatusContext";
 import {z, ZodFormattedError} from "zod"
 
 const schema = z.object({
@@ -18,8 +17,7 @@ const schema = z.object({
 })
 
 const AddForm = ({query} : {query ? : string}) => {
-    const {addGame, checkGame} = useGames() ?? {};
-    const { isNetworkUp, isServerUp } = useStatus() || {};
+    const {addGame, checkGameLocally} = useGames() ?? {};
     const [game, setGame] = useState({
         id: -1,
         name: "Baldur's Gate 3",
@@ -51,7 +49,7 @@ const AddForm = ({query} : {query ? : string}) => {
             return;
         }
 
-        if (checkGame?.(game)) {
+        if (checkGameLocally?.(game)) {
             setErrors({
                 _errors: errors?._errors ?? [],
                 name: {
@@ -66,33 +64,7 @@ const AddForm = ({query} : {query ? : string}) => {
             return;
         }
 
-        if (isServerUp && isNetworkUp) {
-            await fetch(`http://localhost:8080/api/games`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({name: game.name, description: game.description, image: game.image, releaseDate: game.releaseDate, price: game.price, tag: game.tag}),
-            });
-
-            const response = await fetch(`http://localhost:8080/api/games/filter`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({name: game.name}),
-            });
-
-            const data = await response.json();
-
-            for (const jsonGame of data.rows) {
-                if (jsonGame.name == game.name) {
-                    game.id = jsonGame.id;
-                }
-            }
-        }
-
-        addGame?.(game);
+        await addGame?.(game);
         router.push("/");
     }
 

@@ -6,7 +6,7 @@
   "author": "",
   "main": "server.js",
   "scripts": {
-    "dev": "dotenv -e .env nodemon server",
+    "dev": "dotenv -e .env nodemon --max-old-space-size=4096 server",
     "start": "node server",
     "test": "jest"
   },
