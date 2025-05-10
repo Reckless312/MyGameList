@@ -3,7 +3,7 @@ import Link from "next/link";
 import React from "react";
 import SortButton from "@/app/components/SortButton";
 
-let isAdmin = true;
+const isAdmin = true;
 
 const PagesNavigation = ( {query}: {query?: string}) => {
     return (
