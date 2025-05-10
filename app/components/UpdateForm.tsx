@@ -6,8 +6,6 @@ import InputComponent from "@/app/components/InputComponent";
 import {useGames} from "@/app/components/GamesContext";
 import {useRouter, useSearchParams} from "next/navigation";
 import {z, ZodFormattedError} from "zod"
-import {useStatus} from "@/app/components/ApplicationStatusContext";
-
 
 const schema = z.object({
     name: z.string().min(3, "Name must be a string with at least 3 characters"),
@@ -21,8 +19,7 @@ const schema = z.object({
 const UpdateForm = ({query} : {query ? : string}) => {
     const searchParams = useSearchParams();
 
-    const {updateGame, checkGame} = useGames() ?? {};
-    const { isNetworkUp, isServerUp } = useStatus() || {};
+    const {updateGame, checkGameLocally} = useGames() ?? {};
     const [game, setGame] = useState({
         id: Number(searchParams.get("id")) ?? -1,
         name: searchParams.get("name") ?? "",
@@ -56,7 +53,7 @@ const UpdateForm = ({query} : {query ? : string}) => {
             return;
         }
 
-        if (checkGame?.(game) && gameTitle.current != game.name) {
+        if (checkGameLocally?.(game) && gameTitle.current != game.name) {
             setErrors({
                 _errors: errors?._errors ?? [],
                 name: {
@@ -71,17 +68,7 @@ const UpdateForm = ({query} : {query ? : string}) => {
             return;
         }
 
-        if (isServerUp && isNetworkUp) {
-            await fetch(`http://localhost:8080/api/games`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(game),
-            });
-        }
-
-        updateGame?.(gameTitle.current, game);
+        await updateGame?.(gameTitle.current, game);
         router.push("/");
     }
 

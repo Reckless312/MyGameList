@@ -1,7 +1,7 @@
 const {Router} = require("express");
 const {z} = require("zod");
 const {returnGames, findGameByName, createNewGame, findGameById, deleteGameById,
-    findGameByNameWithDifferentId, updateGame, findGamesByName, getGamesOrderedByName} = require('../sequalize');
+    findGameByNameWithDifferentId, updateGame, findGamesByName, getGamesOrderedByAttribute, getMaximumId} = require('../sequalize');
 
 const gameSchema = z.object({
     name: z.string().min(3),
@@ -14,11 +14,19 @@ const gameSchema = z.object({
 
 const router = Router();
 
+let lastIdGet = 0;
+
 router.route('/')
     .get(async (req, res) => {
         try {
-            const result = await returnGames();
-            res.json(result);
+            const {games, id} = await returnGames(lastIdGet);
+            lastIdGet = id;
+
+            if (lastIdGet > await getMaximumId()) {
+                lastIdGet = 0;
+            }
+
+            res.json(games);
         } catch (error) {
             res.status(500).json({message: 'Error happened while retrieving games'});
         }
@@ -45,6 +53,8 @@ router.route('/')
             }
 
             await createNewGame(name, description, image, tag, price, releaseDate);
+
+            last
 
             res.status(200).json({ message: 'Game created successfully' });
         } catch (error) {
@@ -127,10 +137,27 @@ router.route('/filter')
 router.route('/sort')
     .get(async (req, res) => {
         try {
-            const result = await getGamesOrderedByName();
+            const result = await getGamesOrderedByAttribute();
             res.json(result);
         } catch (error) {
             res.status(500).json({ message: 'Error happened while retrieving games' });
+        }
+    })
+
+router.route('/filter/id')
+    .post(async (req, res) => {
+        try {
+            if (req.body === undefined || req.body?.id === undefined) {
+                return res.status(404).json({ message: 'Missing required fields' });
+            }
+
+            const { id } = req.body;
+
+            const result = await findGameById(id);
+
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Error happened while filtering games' });
         }
     })
 

@@ -5,12 +5,17 @@ import React from "react";
 import {useGames} from "@/app/components/GamesContext";
 
 const SortButton = () => {
-    const {sortGames} = useGames() ?? {};
+    const {sortGamesByName, sortGamesByPrice} = useGames() ?? {};
 
     return (
-        <Button className="bg-cyan-500 w-40 on hover:bg-cyan-900" variant="default" onClick={() => {
-            sortGames?.();
-        }}>Sort</Button>
+        <div className="space-x-10">
+            <Button className="bg-cyan-500 w-40 on hover:bg-cyan-900" variant="default" onClick={() => {
+                sortGamesByName?.();
+            }}>Sort By Name</Button>
+            <Button className="bg-cyan-500 w-40 on hover:bg-cyan-900" variant="default" onClick={() => {
+                sortGamesByPrice?.();
+            }}>Sort By Price</Button>
+        </div>
     )
 }
 
