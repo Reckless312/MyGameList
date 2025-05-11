@@ -2,7 +2,7 @@ const {Sequelize, DataTypes} = require("sequelize");
 const {Op} = require("@sequelize/core")
 const {faker} = require("@faker-js/faker")
 const {randomInt} = require("node:crypto");
-const {gameTitles, imageUrls, uniqueGameTags, gameDescriptions} = require("./videogames")
+const {gameTitles, imageUrls, uniqueGameTags, gameDescriptions} = require("../videogames")
 
 async function generateEntities(size){
     for (let i = 0; i < size; i++) {
@@ -102,7 +102,7 @@ async function returnGames(lastId){
     return {games, id: games.length ? games[games.length - 1].id : null};
 }
 
-async function findGameByName(name){
+async function findGameIdByName(name){
     return await Game.findOne({
         where: {
             name: name
@@ -120,7 +120,7 @@ async function createNewGame(name, description, image, tag, price, releaseDate){
         tag: tag
     })
 
-    const addedGame = await findGameByName(name);
+    const addedGame = await findGameIdByName(name);
 
     await GameImage.create({
         image: image,
@@ -221,6 +221,6 @@ function getSortingOrder(sortingCode){
 }
 
 module.exports = {
-    Game, GameImage, GameDescription, connectToDatabase, initializeTables, returnGames, findGameByName, createNewGame, findGameById,
-    deleteGameById, findGameByNameWithDifferentId, updateGame, findGamesByName, getGamesOrderedByAttribute, generateEntities, getMaximumId
+    connectToDatabase, initializeTables, returnGames, findGameByName: findGameIdByName, createNewGame, findGameById, deleteGameById, findGameByNameWithDifferentId,
+    updateGame, findGamesByName, getGamesOrderedByAttribute, generateEntities, getMaximumId
 }

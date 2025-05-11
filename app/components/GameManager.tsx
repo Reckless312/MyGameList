@@ -20,7 +20,7 @@ function rezolveDescriptionsAndImages (games: any){
 
 export {rezolveDescriptionsAndImages};
 
-export default function GameManager() {
+export default function GameManager(props: {session: { user?: { name?: string; image?: string; email?: string } } | null }) {
     const { games, addMultipleGames, checkGame, setNewGames, fetchGameByName, getRemovableGames, setNewRemovableGames} = useGames() || {};
     const { isNetworkUp, isServerUp } = useStatus() || {};
     const [areGamesFetched, setGamesFetched] = useState(false);
@@ -32,6 +32,29 @@ export default function GameManager() {
                 const response = await fetch(`http://localhost:8080/api/games`);
                 const games = await response.json();
                 addMultipleGames?.(rezolveDescriptionsAndImages(games));
+
+                const userResponse = await fetch(`http://localhost:8080/actions/name`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({name: props.session?.user?.name}),
+                });
+
+                const user = await userResponse.json();
+
+                if (user === null){
+                    await fetch(`http://localhost:8080/actions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({name: props.session?.user?.name, email: props.session?.user?.email, image: props.session?.user?.image}),
+                    });
+                }
+                else{
+
+                }
             } catch (e) {
                 console.error(e);
             }

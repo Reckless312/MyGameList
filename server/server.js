@@ -1,8 +1,10 @@
 const express = require('express');
 const gamesRoute = require("./api/games");
 const filesRoute = require("./api/files");
+const actionRoute = require("./api/actions");
 const cors = require("cors");
-const {connectToDatabase, initializeTables, generateEntities} = require("./sequalize")
+const {connectToDatabase, initializeTables, generateEntities} = require("./sequalize/games")
+const {connectToDatabaseForUsers, initializeUserTable} = require("./sequalize/users");
 
 const allowedOrigins = ['http://localhost:3000', 'https://www.google.com', 'http://localhost:8080'];
 const app = express();
@@ -18,12 +20,16 @@ app.use(express.json());
 
 app.use('/api/games', gamesRoute);
 app.use('/', filesRoute);
+app.use('/actions', actionRoute);
 
 module.exports = app;
 
 app.listen(port, async () => {
     await connectToDatabase();
     await initializeTables();
+
+    await connectToDatabaseForUsers();
+    await initializeUserTable();
 
     await generateEntities(0);
 

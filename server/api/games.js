@@ -1,7 +1,7 @@
 const {Router} = require("express");
 const {z} = require("zod");
-const {returnGames, findGameByName, createNewGame, findGameById, deleteGameById,
-    findGameByNameWithDifferentId, updateGame, findGamesByName, getGamesOrderedByAttribute, getMaximumId} = require('../sequalize');
+const {returnGames, findGameIdByName, createNewGame, findGameById, deleteGameById,
+    findGameByNameWithDifferentId, updateGame, findGamesByName, getGamesOrderedByAttribute, getMaximumId} = require('../sequalize/games');
 
 const gameSchema = z.object({
     name: z.string().min(3),
@@ -46,7 +46,7 @@ router.route('/')
 
             const { name, description, image, releaseDate, price, tag } = req.body;
 
-            const existing = await findGameByName(name);
+            const existing = await findGameIdByName(name);
 
             if (existing) {
                 return res.status(401).json({ message: 'Game already found with same critical information' });
