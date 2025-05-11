@@ -184,9 +184,7 @@ export function GamesProvider({children}: {children: ReactNode}) {
             },
             body: JSON.stringify({id: id}),
         });
-        console.log(id);
-        const data = await response.json();
-        return data.length > 0 ? data[0] : null;
+        return await response.json();
     }
 
     const fetchGameByName = async (name: string) => {
@@ -197,8 +195,7 @@ export function GamesProvider({children}: {children: ReactNode}) {
             },
             body: JSON.stringify({name: name}),
         });
-        const data = await response.json();
-        return data.length > 0 ? data[0] : null;
+        return await response.json();
     }
 
     const setNewGames = (newGames: Game[]) => {
