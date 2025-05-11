@@ -1,15 +1,19 @@
 const {Sequelize, DataTypes} = require("sequelize");
 const {Op} = require("@sequelize/core")
 const {faker} = require("@faker-js/faker")
+const {randomInt} = require("node:crypto");
+const {gameTitles, imageUrls, uniqueGameTags, gameDescriptions} = require("./videogames")
 
 async function generateEntities(size){
     for (let i = 0; i < size; i++) {
-        const name = faker.word.sample();
-        const releaseDate = faker.date.past().toISOString().split('T')[0];
-        const price = faker.number.float();
-        const tag = faker.word.sample();
-        const description = faker.word.sample();
-        const image = faker.image.url();
+        // Faker sucks so I am hardcoding, also there shouldn't be games with same name or others identical
+        // Should be unique if only ran once on a clean database
+        const name = gameTitles[randomInt(0, gameTitles.length)] + " " + faker.book.title() + " " + i.toString();
+        const releaseDate = faker.date.past({years: 34}).toISOString().split('T')[0];
+        const price = faker.number.float({min: 0, max: 100, multipleOf: 0.5}).toFixed(2);
+        const tag = uniqueGameTags[randomInt(0, uniqueGameTags.length)];
+        const description = gameDescriptions[randomInt(0, gameDescriptions.length)] + " " + faker.word.sample() + " " + i.toString();
+        const image = imageUrls[randomInt(0, imageUrls.length)]
 
         try{
             await createNewGame(name, description, image, tag, price, releaseDate);

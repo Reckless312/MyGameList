@@ -3,6 +3,7 @@
 import {useEffect, useState} from "react";
 import {useGames} from "@/app/components/GamesContext";
 import { useStatus } from "@/app/components/ApplicationStatusContext";
+import {useRouter} from "next/navigation";
 
 function rezolveDescriptionsAndImages (games: any){
     const mergedGames = []
@@ -23,6 +24,7 @@ export default function GameManager() {
     const { games, addMultipleGames, checkGame, setNewGames, fetchGameByName, getRemovableGames, setNewRemovableGames} = useGames() || {};
     const { isNetworkUp, isServerUp } = useStatus() || {};
     const [areGamesFetched, setGamesFetched] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchGames = async () => {
@@ -46,7 +48,7 @@ export default function GameManager() {
 
                     const isGameOnServer = await checkGame?.(game);
 
-                    if (!isGameOnServer && game) {
+                    if (!isGameOnServer) {
                         await fetch(`http://localhost:8080/api/games`, {
                             method: 'POST',
                             headers: {
@@ -87,6 +89,7 @@ export default function GameManager() {
                 }
                 setNewRemovableGames?.([]);
                 setNewGames?.(newGames);
+                router.push("/");
             }
         }
 

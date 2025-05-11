@@ -8,7 +8,7 @@ const gameSchema = z.object({
     description: z.string().min(10),
     image: z.string().url(),
     releaseDate: z.string().date(),
-    price: z.number().nonnegative().max(99.99),
+    price: z.number().nonnegative().max(100),
     tag: z.string().min(3),
 });
 
@@ -53,8 +53,6 @@ router.route('/')
             }
 
             await createNewGame(name, description, image, tag, price, releaseDate);
-
-            last
 
             res.status(200).json({ message: 'Game created successfully' });
         } catch (error) {
