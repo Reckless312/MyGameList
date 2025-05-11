@@ -21,7 +21,7 @@ export default async function Layout({ children }: Readonly<{ children: React.Re
                             <Header session={session ? { user: { name: session.user?.name ?? undefined, image: session.user?.image ?? undefined } } : null}/>
                             <div className="flex-1 bg-black">{children}</div>
                             <Footer />
-                            <GameManager/>
+                            <GameManager session={session ? { user: { name: session.user?.name ?? undefined, image: session.user?.image ?? undefined, email: session.user?.email ?? undefined } } : null}/>
                             <ServerAndNetworkStatus/>
                         </GamesProvider>
                     </ApplicationStatusProvider>
