@@ -17,7 +17,7 @@ export default async function Layout({ children }: Readonly<{ children: React.Re
             <body className="min-h-screen flex flex-col bg-black">
                 <main className={`${inter.className} antialiased flex-1 flex flex-col`}>
                     <ApplicationStatusProvider>
-                        <GamesProvider>
+                        <GamesProvider session={session ? { user: { name: session.user?.name ?? undefined, image: session.user?.image ?? undefined, email: session.user?.email ?? undefined } } : null}>
                             <Header session={session ? { user: { name: session.user?.name ?? undefined, image: session.user?.image ?? undefined } } : null}/>
                             <div className="flex-1 bg-black">{children}</div>
                             <Footer />

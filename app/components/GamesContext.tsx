@@ -37,20 +37,22 @@ let sortByPriceAscending = true;
 
 const GamesContext = createContext<GamesContextType | undefined>(undefined);
 
-export function GamesProvider({children}: {children: ReactNode}) {
+export function GamesProvider({children, session}: {children: ReactNode; session: { user?: { name?: string; image?: string; email?: string } } | null}) {
     const [games, setGames] = useState<Game[]>([]);
     const [removableGames, setRemovableGames] = useState<Game[]>([]);
     const { isNetworkUp, isServerUp } = useStatus() || {};
 
     const addGame = async (game: Game) => {
         if (isServerUp && isNetworkUp) {
-            const checkGame = await fetchGameByName(game.name);
+            const similarGames = await fetchGameByName(game.name);
 
-            if (checkGame !== null) {
-                return;
+            for (const foundGame of similarGames) {
+                if (foundGame.name === game.name) {
+                    return;
+                }
             }
 
-            await fetch(`http://localhost:8080/api/games`, {
+            await fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/api/games`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -59,9 +61,16 @@ export function GamesProvider({children}: {children: ReactNode}) {
             });
             const foundGame = await fetchGameByName(game.name);
             game.id = foundGame.id;
+
+            fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/actions/add`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({name: session?.user?.name, time: new Date().toLocaleTimeString()}),
+            }).then(() => {});
         }
 
-        // TO DO: If the server is down, games will be added with id -1, need to change once the server is back up
         setGames([...games, game]);
     }
 
@@ -71,13 +80,21 @@ export function GamesProvider({children}: {children: ReactNode}) {
 
     const removeGame = async (game: Game) => {
         if (isServerUp && isNetworkUp) {
-            await fetch(`http://localhost:8080/api/games`, {
+            await fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/api/games`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({id: game.id}),
             });
+
+            fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/actions/remove`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({name: session?.user?.name, time: new Date().toLocaleTimeString()}),
+            }).then(() => {});
         }
         else{
             setRemovableGames([...removableGames, game]);
@@ -100,22 +117,30 @@ export function GamesProvider({children}: {children: ReactNode}) {
 
     const updateGame = async (gameTitle: string | null, updatedGame: Game) => {
         if (isServerUp && isNetworkUp) {
-            const checkGame = await fetchGameByName(updatedGame.name);
+            const similarGames = await fetchGameByName(updatedGame.name);
 
-            if (checkGame !== null) {
-                return;
+            for (const foundGame of similarGames) {
+                if (foundGame.name === gameTitle) {
+                    return;
+                }
             }
 
-            await fetch(`http://localhost:8080/api/games`, {
+            await fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/api/games`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(updatedGame),
             });
-        }
 
-        //TO DO: Fix the id -1 thing so we won't get issues when offline and add + update are performed
+            fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/actions/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({name: session?.user?.name, time: new Date().toLocaleTimeString()}),
+            }).then(() => {});
+        }
         setGames(games.map((inListGame) => inListGame.name === gameTitle ? updatedGame : inListGame));
     }
 
@@ -177,7 +202,7 @@ export function GamesProvider({children}: {children: ReactNode}) {
     }
 
     const fetchGameById = async (id: number) => {
-        const response = await fetch(`http://localhost:8080/api/games/filter/id`, {
+        const response = await fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/api/games/filter/id`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -188,7 +213,7 @@ export function GamesProvider({children}: {children: ReactNode}) {
     }
 
     const fetchGameByName = async (name: string) => {
-        const response = await fetch(`http://localhost:8080/api/games/filter`, {
+        const response = await fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/api/games/filter`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

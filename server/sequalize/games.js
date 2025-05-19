@@ -221,6 +221,6 @@ function getSortingOrder(sortingCode){
 }
 
 module.exports = {
-    connectToDatabase, initializeTables, returnGames, findGameByName: findGameIdByName, createNewGame, findGameById, deleteGameById, findGameByNameWithDifferentId,
+    connectToDatabase, initializeTables, returnGames, findGameIdByName, createNewGame, findGameById, deleteGameById, findGameByNameWithDifferentId,
     updateGame, findGamesByName, getGamesOrderedByAttribute, generateEntities, getMaximumId
 }

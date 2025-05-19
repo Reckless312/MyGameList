@@ -29,11 +29,11 @@ export default function GameManager(props: {session: { user?: { name?: string; i
     useEffect(() => {
         const fetchGames = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/games`);
+                const response = await fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/api/games`);
                 const games = await response.json();
                 addMultipleGames?.(rezolveDescriptionsAndImages(games));
 
-                const userResponse = await fetch(`http://localhost:8080/actions/name`, {
+                const userResponse = await fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/actions/name`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -44,13 +44,13 @@ export default function GameManager(props: {session: { user?: { name?: string; i
                 const user = await userResponse.json();
 
                 if (user === null){
-                    await fetch(`http://localhost:8080/actions`, {
+                    fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/actions`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({name: props.session?.user?.name, email: props.session?.user?.email, image: props.session?.user?.image}),
-                    });
+                    }).then(() => {});
                 }
                 else{
 
@@ -72,7 +72,7 @@ export default function GameManager(props: {session: { user?: { name?: string; i
                     const isGameOnServer = await checkGame?.(game);
 
                     if (!isGameOnServer) {
-                        await fetch(`http://localhost:8080/api/games`, {
+                        await fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/api/games`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export default function GameManager(props: {session: { user?: { name?: string; i
                         }
                     }
                     else{
-                        await fetch(`http://localhost:8080/api/games`, {
+                        await fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/api/games`, {
                             method: 'PATCH',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ export default function GameManager(props: {session: { user?: { name?: string; i
 
                 const removableGames = getRemovableGames?.();
                 for (const game of removableGames || []) {
-                    await fetch(`http://localhost:8080/api/games`, {
+                    await fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/api/games`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',

@@ -36,11 +36,11 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:8080/api/games/filter
+POST http://localhost:8080/api/games/filter/id
 Content-Type: application/json
 
 {
-  "name": "far"
+  "id": 1000000
 }
 
 ###
