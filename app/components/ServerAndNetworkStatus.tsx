@@ -21,7 +21,7 @@ export default function ServerAndNetworkStatus() {
 
         const checkServerStatus = async () =>{
             try {
-                await fetch('http://localhost:8080/api/games')
+                await fetch('https://my-game-list-sand.vercel.app/api/games')
                 ChangeServerStatus?.(true);
             } catch{
                 ChangeServerStatus?.(false);
