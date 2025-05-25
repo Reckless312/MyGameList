@@ -45,6 +45,7 @@ export function GamesProvider({children, session}: {children: ReactNode; session
     const addGame = async (game: Game) => {
         if (isServerUp && isNetworkUp) {
             const similarGames = await fetchGameByName(game.name);
+            console.log(similarGames);
 
             for (const foundGame of similarGames) {
                 if (foundGame.name === game.name) {
@@ -61,6 +62,7 @@ export function GamesProvider({children, session}: {children: ReactNode; session
             });
             const foundGame = await fetchGameByName(game.name);
             game.id = foundGame.id;
+            console.log(foundGame);
 
             fetch(`https://nodejs-serverless-function-express-gamma-one.vercel.app/actions/add`, {
                 method: 'POST',
@@ -69,6 +71,7 @@ export function GamesProvider({children, session}: {children: ReactNode; session
                 },
                 body: JSON.stringify({name: session?.user?.name, time: new Date().toLocaleTimeString()}),
             }).then(() => {});
+            console.log("done");
         }
 
         setGames([...games, game]);
