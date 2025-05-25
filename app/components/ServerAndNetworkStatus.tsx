@@ -21,7 +21,7 @@ export default function ServerAndNetworkStatus() {
 
         const checkServerStatus = async () =>{
             try {
-                await fetch('https://my-game-list-sand.vercel.app/api/games')
+                await fetch('https://nodejs-serverless-function-express-gamma-one.vercel.app/api/games')
                 ChangeServerStatus?.(true);
             } catch{
                 ChangeServerStatus?.(false);
